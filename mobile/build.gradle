@@ -22,7 +22,6 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'realm-android'
-apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'com.github.triplet.play'
 
 
@@ -37,6 +36,9 @@ android {
     flavorDimensions "release"
     compileSdkVersion rootProject.compileSdkVersion
     buildToolsVersion rootProject.buildToolsVersion
+    buildFeatures {
+        viewBinding true
+    }
     defaultConfig {
 
         applicationId "me.calebjones.spacelaunchnow"
@@ -68,14 +70,11 @@ android {
             renderscriptOptimLevel 3
             versionNameSuffix "-debug-b${defaultConfig.versionCode}"
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules-debug.pro'
         }
         release {
             zipAlignEnabled true
             minifyEnabled true
             shrinkResources true
-            useProguard true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
     lintOptions {
@@ -182,8 +181,6 @@ dependencies {
     // Firebase Messaging
     implementation deps.firebaseMessaging
     implementation deps.timber
-    implementation deps.butterknife
-    annotationProcessor deps.butterknifeCompiler
     implementation deps.bottomNavigation
     implementation deps.preferences
     implementation deps.deepLinkDispatch

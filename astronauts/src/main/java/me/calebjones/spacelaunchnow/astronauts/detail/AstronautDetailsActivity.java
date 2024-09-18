@@ -1,24 +1,19 @@
 package me.calebjones.spacelaunchnow.astronauts.detail;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.appbar.CollapsingToolbarLayout;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
+
 import androidx.core.app.ShareCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -29,11 +24,6 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import cz.kinst.jakub.view.SimpleStatefulLayout;
-import de.hdodenhof.circleimageview.CircleImageView;
 import jonathanfinerty.once.Amount;
 import jonathanfinerty.once.Once;
 import me.calebjones.spacelaunchnow.astronauts.data.AstronautDataRepository;
@@ -44,40 +34,11 @@ import me.calebjones.spacelaunchnow.common.ui.supporter.SupporterHelper;
 import me.calebjones.spacelaunchnow.data.models.main.Agency;
 import me.calebjones.spacelaunchnow.data.models.main.astronaut.Astronaut;
 import me.spacelaunchnow.astronauts.R;
-import me.spacelaunchnow.astronauts.R2;
+import me.spacelaunchnow.astronauts.databinding.ActivityAstronautDetailsBinding;
 import timber.log.Timber;
 
 public class AstronautDetailsActivity extends BaseActivity implements AppBarLayout.OnOffsetChangedListener, SwipeRefreshLayout.OnRefreshListener {
 
-
-    @BindView(R2.id.astronaut_profile_backdrop)
-    ImageView astronautProfileBackdrop;
-    @BindView(R2.id.astronaut_collapsing)
-    CollapsingToolbarLayout astronautCollapsing;
-    @BindView(R2.id.astronaut_profile_image)
-    CircleImageView astronautProfileImage;
-    @BindView(R2.id.astronaut_detail_toolbar)
-    Toolbar toolbar;
-    @BindView(R2.id.astronaut_title)
-    TextView astronautTitle;
-    @BindView(R2.id.astronaut_subtitle)
-    TextView astronautSubtitle;
-    @BindView(R2.id.astronaut_detail_tabs)
-    TabLayout tabs;
-    @BindView(R2.id.appbar)
-    AppBarLayout appbar;
-    @BindView(R2.id.astronaut_detail_viewpager)
-    ViewPager viewPager;
-    @BindView(R2.id.astronaut_adView)
-    AdView astronautAdView;
-    @BindView(R2.id.astronaut_stateful_view)
-    SimpleStatefulLayout astronautStatefulView;
-    @BindView(R2.id.astronaut_detail_swipe_refresh)
-    SwipeRefreshLayout astronautDetailSwipeRefresh;
-    @BindView(R2.id.astronaut_fab_share)
-    FloatingActionButton astronautFabShare;
-    @BindView(R2.id.rootview)
-    CoordinatorLayout rootview;
 
     private static final int PERCENTAGE_TO_ANIMATE_AVATAR = 20;
     private boolean mIsAvatarShown = true;
@@ -96,21 +57,22 @@ public class AstronautDetailsActivity extends BaseActivity implements AppBarLayo
     private Astronaut astronaut;
     private Agency agency;
     private int astronautId;
+    private ActivityAstronautDetailsBinding bindings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_astronaut_details);
-        ButterKnife.bind(this);
-        astronautFabShare.setVisibility(View.GONE);
-        setSupportActionBar(toolbar);
+        bindings = ActivityAstronautDetailsBinding.inflate(getLayoutInflater());
+
+        bindings.astronautFabShare.setVisibility(View.GONE);
+        setSupportActionBar(bindings.astronautDetailToolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        astronautDetailSwipeRefresh.setOnRefreshListener(this);
-        viewPager.setAdapter(mSectionsPagerAdapter);
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabs));
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        bindings.astronautDetailSwipeRefresh.setOnRefreshListener(this);
+        bindings.astronautDetailViewpager.setAdapter(mSectionsPagerAdapter);
+        bindings.astronautDetailViewpager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(bindings.astronautDetailTabs));
+        bindings.astronautDetailViewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float v, int i1) {
             }
@@ -124,19 +86,20 @@ public class AstronautDetailsActivity extends BaseActivity implements AppBarLayo
                 enableDisableSwipeRefresh(state == ViewPager.SCROLL_STATE_IDLE);
             }
         });
-        tabs.addTab(tabs.newTab().setText(getString(R.string.profile)));
-        tabs.addTab(tabs.newTab().setText(getString(R.string.flights)));
-        tabs.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(viewPager));
+        bindings.astronautDetailTabs.addTab(bindings.astronautDetailTabs.newTab().setText(getString(R.string.profile)));
+        bindings.astronautDetailTabs.addTab(bindings.astronautDetailTabs.newTab().setText(getString(R.string.flights)));
+        bindings.astronautDetailTabs.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(bindings.astronautDetailViewpager));
         astronautDataRepository = new AstronautDataRepository(this, getRealm());
 
         //Grab information from Intent
         Intent mIntent = getIntent();
+        Context context = this;
         astronautId = mIntent.getIntExtra("astronautId", 0);
 
         fetchData(astronautId);
 
-        if (toolbar != null) {
-            setSupportActionBar(toolbar);
+        if (bindings.astronautDetailToolbar != null) {
+            setSupportActionBar(bindings.astronautDetailToolbar);
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                 getSupportActionBar().setHomeButtonEnabled(true);
@@ -160,23 +123,30 @@ public class AstronautDetailsActivity extends BaseActivity implements AppBarLayo
         if (!SupporterHelper.isSupporter() && Once.beenDone("appOpen",
                 Amount.moreThan(3))) {
             AdRequest adRequest = new AdRequest.Builder().build();
-            astronautAdView.loadAd(adRequest);
-            astronautAdView.setAdListener(new AdListener() {
+            bindings.astronautAdView.loadAd(adRequest);
+            bindings.astronautAdView.setAdListener(new AdListener() {
 
                 @Override
                 public void onAdLoaded() {
-                    astronautAdView.setVisibility(View.VISIBLE);
+                    bindings.astronautAdView.setVisibility(View.VISIBLE);
                 }
 
             });
         } else {
-            astronautAdView.setVisibility(View.GONE);
+            bindings.astronautAdView.setVisibility(View.GONE);
         }
+
+        bindings.astronautFabShare.setOnClickListener(view -> new ShareCompat.IntentBuilder(
+                AstronautDetailsActivity.this)
+                .setType("text/plain")
+                .setChooserTitle(astronaut.getName())
+                .setText(astronaut.getUrl())
+                .startChooser());
     }
 
     private void enableDisableSwipeRefresh(boolean enable) {
-        if (astronautDetailSwipeRefresh != null) {
-            astronautDetailSwipeRefresh.setEnabled(enable);
+        if (bindings.astronautDetailSwipeRefresh != null) {
+            bindings.astronautDetailSwipeRefresh.setEnabled(enable);
         }
     }
 
@@ -233,15 +203,15 @@ public class AstronautDetailsActivity extends BaseActivity implements AppBarLayo
     private void updateAstronautViews(Astronaut astronaut) {
         this.astronaut = astronaut;
         try {
-            astronautTitle.setText(astronaut.getName());
-            astronautSubtitle.setText(astronaut.getNationality());
+            bindings.astronautTitle.setText(astronaut.getName());
+            bindings.astronautSubtitle.setText(astronaut.getNationality());
 
             GlideApp.with(this)
                     .load(astronaut.getProfileImage())
                     .thumbnail(GlideApp.with(this)
                             .load(astronaut.getProfileImageThumbnail()))
                     .placeholder(R.drawable.placeholder)
-                    .into(astronautProfileImage);
+                    .into(bindings.astronautProfileImage);
         } catch (Exception e) {
             Timber.e(e);
         }
@@ -270,7 +240,7 @@ public class AstronautDetailsActivity extends BaseActivity implements AppBarLayo
 
         if (percentage >= PERCENTAGE_TO_ANIMATE_AVATAR && mIsAvatarShown) {
             mIsAvatarShown = false;
-            astronautProfileImage.animate()
+            bindings.astronautProfileImage.animate()
                     .scaleY(0).scaleX(0)
                     .setDuration(300)
                     .start();
@@ -279,7 +249,7 @@ public class AstronautDetailsActivity extends BaseActivity implements AppBarLayo
         if (percentage <= PERCENTAGE_TO_ANIMATE_AVATAR && !mIsAvatarShown) {
             mIsAvatarShown = true;
 
-            astronautProfileImage.animate()
+            bindings.astronautProfileImage.animate()
                     .scaleY(1).scaleX(1)
                     .start();
         }
@@ -295,12 +265,12 @@ public class AstronautDetailsActivity extends BaseActivity implements AppBarLayo
 
     private void showLoading() {
         Timber.v("Show Loading...");
-        astronautDetailSwipeRefresh.post(() -> astronautDetailSwipeRefresh.setRefreshing(true));
+        bindings.astronautDetailSwipeRefresh.post(() -> bindings.astronautDetailSwipeRefresh.setRefreshing(true));
     }
 
     private void hideLoading() {
         Timber.v("Hide Loading...");
-        astronautDetailSwipeRefresh.post(() -> astronautDetailSwipeRefresh.setRefreshing(false));
+        bindings.astronautDetailSwipeRefresh.post(() -> bindings.astronautDetailSwipeRefresh.setRefreshing(false));
     }
 
 
@@ -316,16 +286,6 @@ public class AstronautDetailsActivity extends BaseActivity implements AppBarLayo
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    //TODO Get URL for SLN website.
-    @OnClick(R2.id.astronaut_fab_share)
-    void fabClicked() {
-        ShareCompat.IntentBuilder.from(this)
-                .setType("text/plain")
-                .setChooserTitle(astronaut.getName())
-                .setText(astronaut.getUrl())
-                .startChooser();
     }
 
     @Override

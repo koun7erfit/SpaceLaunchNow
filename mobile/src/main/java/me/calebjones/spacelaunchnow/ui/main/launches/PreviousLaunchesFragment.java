@@ -1,10 +1,8 @@
 package me.calebjones.spacelaunchnow.ui.main.launches;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.MenuItemCompat;
 import androidx.appcompat.widget.SearchView;
 import android.view.LayoutInflater;
@@ -13,7 +11,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.clockbyte.admobadapter.bannerads.AdmobBannerRecyclerAdapterWrapper;
 
@@ -24,10 +21,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-import cz.kinst.jakub.view.SimpleStatefulLayout;
+
 import me.calebjones.spacelaunchnow.R;
 import me.calebjones.spacelaunchnow.common.base.BaseFragment;
 import me.calebjones.spacelaunchnow.common.prefs.ThemeHelper;
@@ -36,10 +30,9 @@ import me.calebjones.spacelaunchnow.common.utils.EndlessRecyclerViewScrollListen
 import me.calebjones.spacelaunchnow.common.utils.SimpleDividerItemDecoration;
 import me.calebjones.spacelaunchnow.common.content.data.Callbacks;
 import me.calebjones.spacelaunchnow.common.content.data.previous.PreviousDataRepository;
-import me.calebjones.spacelaunchnow.common.utils.Utils;
 import me.calebjones.spacelaunchnow.data.models.main.LaunchList;
 import me.calebjones.spacelaunchnow.common.ui.supporter.SupporterHelper;
-import me.calebjones.spacelaunchnow.utils.views.filter.LaunchFilterDialog;
+import me.calebjones.spacelaunchnow.databinding.FragmentLaunchesBinding;
 import me.calebjones.spacelaunchnow.common.ui.views.SnackbarHandler;
 import timber.log.Timber;
 import java.lang.reflect.Field;
@@ -55,17 +48,7 @@ public class PreviousLaunchesFragment extends BaseFragment implements SearchView
     private int nextOffset = 0;
     private EndlessRecyclerViewScrollListener scrollListener;
     private String searchTerm = null;
-
-    @BindView(R.id.stateful_view)
-    SimpleStatefulLayout statefulView;
-    @BindView(R.id.recycler_view)
-    RecyclerView mRecyclerView;
-    @BindView(R.id.swipe_refresh_layout)
-    SwipeRefreshLayout mSwipeRefreshLayout;
-    @BindView(R.id.coordinatorLayout)
-    CoordinatorLayout coordinatorLayout;
-
-    Unbinder unbinder;
+    private FragmentLaunchesBinding binding;
     private SearchView searchView;
     public boolean canLoadMore;
     private boolean statefulStateContentShow = false;
@@ -81,6 +64,8 @@ public class PreviousLaunchesFragment extends BaseFragment implements SearchView
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        binding = FragmentLaunchesBinding.inflate(inflater, container, false);
+
         this.context = getContext();
         canLoadMore = true;
         setHasOptionsMenu(true);
@@ -89,16 +74,13 @@ public class PreviousLaunchesFragment extends BaseFragment implements SearchView
             adapter = new ListAdapter(getContext(), ThemeHelper.isDarkMode(getActivity()));
         }
 
-        view = inflater.inflate(R.layout.fragment_launches, container, false);
-        unbinder = ButterKnife.bind(this, view);
-
-        mSwipeRefreshLayout.setOnRefreshListener(this);
+        binding.swipeRefreshLayout.setOnRefreshListener(this);
 
         layoutManager = new LinearLayoutManager(getContext());
-        mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(context));
+        binding.recyclerView.setLayoutManager(layoutManager);
+        binding.recyclerView.addItemDecoration(new SimpleDividerItemDecoration(context));
 
-        mRecyclerView.setAdapter(adapter);
+        binding.recyclerView.setAdapter(adapter);
 
         scrollListener = new EndlessRecyclerViewScrollListener(layoutManager) {
             @Override
@@ -109,13 +91,15 @@ public class PreviousLaunchesFragment extends BaseFragment implements SearchView
                 if (canLoadMore && nextOffset > 0) {
                     Timber.v("onLoadMore - adding more!");
                     fetchData(false);
-                    mSwipeRefreshLayout.setRefreshing(true);
+                    binding.swipeRefreshLayout.setRefreshing(true);
                 }
             }
         };
-        mRecyclerView.addOnScrollListener(scrollListener);
-        statefulView.setOfflineRetryOnClickListener(v -> fetchData(true));
-        return view;
+
+        binding.recyclerView.addOnScrollListener(scrollListener);
+        binding.statefulView.setOfflineRetryOnClickListener(v -> fetchData(true));
+
+        return binding.getRoot();
     }
 
     public static PreviousLaunchesFragment newInstance(String text) {
@@ -140,16 +124,16 @@ public class PreviousLaunchesFragment extends BaseFragment implements SearchView
     }
 
     private void updateAdapter(List<LaunchList> launches) {
-        if (launches.size() > 0) {
+        if (!launches.isEmpty()) {
             if (!statefulStateContentShow) {
-                statefulView.showContent();
+                binding.statefulView.showContent();
                 statefulStateContentShow = true;
             }
             adapter.addItems(launches);
             adapter.notifyDataSetChanged();
 
         } else {
-            statefulView.showEmpty();
+            binding.statefulView.showEmpty();
             statefulStateContentShow = false;
             if (adapter != null) {
                 adapter.clear();
@@ -185,16 +169,16 @@ public class PreviousLaunchesFragment extends BaseFragment implements SearchView
             @Override
             public void onError(String message, @Nullable Throwable throwable) {
                 if(getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-                    statefulView.showOffline();
+                    binding.statefulView.showOffline();
                     statefulStateContentShow = false;
                     showNetworkLoading(false);
                     if (throwable != null) {
                         Timber.e(throwable);
                     } else {
                         Timber.e(message);
-                        SnackbarHandler.showErrorSnackbar(context, coordinatorLayout, message);
+                        SnackbarHandler.showErrorSnackbar(context, binding.coordinatorLayout, message);
                     }
-                    SnackbarHandler.showErrorSnackbar(context, coordinatorLayout, message);
+                    SnackbarHandler.showErrorSnackbar(context, binding.coordinatorLayout, message);
                 }
             }
         });
@@ -210,12 +194,12 @@ public class PreviousLaunchesFragment extends BaseFragment implements SearchView
 
     private void showLoading() {
         Timber.v("Show Loading...");
-        mSwipeRefreshLayout.setRefreshing(true);
+        binding.swipeRefreshLayout.setRefreshing(true);
     }
 
     private void hideLoading() {
         Timber.v("Hide Loading...");
-        mSwipeRefreshLayout.setRefreshing(false);
+        binding.swipeRefreshLayout.setRefreshing(false);
     }
 
 
@@ -224,7 +208,7 @@ public class PreviousLaunchesFragment extends BaseFragment implements SearchView
         Timber.d("OnResume!");
         if (adapter.getItemCount() == 0) {
             statefulStateContentShow = false;
-            statefulView.showProgress();
+            binding.statefulView.showProgress();
             fetchData(false);
         }
         super.onResume();
@@ -245,7 +229,7 @@ public class PreviousLaunchesFragment extends BaseFragment implements SearchView
             f = Fragment.class.getDeclaredField("mChildFragmentManager");
             f.setAccessible(true);
         } catch (NoSuchFieldException e) {
-            Timber.e("Error getting mChildFragmentManager field %s", e);
+            Timber.e(e, "Error getting mChildFragmentManager field");
         }
         sChildFragmentManagerField = f;
     }
@@ -256,10 +240,9 @@ public class PreviousLaunchesFragment extends BaseFragment implements SearchView
     public void onDestroyView() {
         super.onDestroyView();
         Timber.v("onDestroyView");
-        mRecyclerView.removeOnScrollListener(scrollListener);
+        binding.recyclerView.removeOnScrollListener(scrollListener);
         scrollListener = null;
-        mSwipeRefreshLayout.setOnRefreshListener(null);
-        unbinder.unbind();
+        binding.swipeRefreshLayout.setOnRefreshListener(null);
     }
 
 
@@ -287,12 +270,6 @@ public class PreviousLaunchesFragment extends BaseFragment implements SearchView
 
         if (id == R.id.action_refresh) {
             onRefresh();
-            return true;
-        }
-
-        if (id == R.id.filter) {
-            LaunchFilterDialog launchFilterDialog = LaunchFilterDialog.newInstance();
-            launchFilterDialog.show(getActivity().getSupportFragmentManager(), "add_previous_filter_dialog_fragment");
             return true;
         }
 

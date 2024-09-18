@@ -11,11 +11,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import me.calebjones.spacelaunchnow.common.utils.Utils;
-import me.calebjones.spacelaunchnow.data.models.main.news.NewsItem;
 import me.calebjones.spacelaunchnow.data.models.main.starship.RoadClosure;
 import me.spacelaunchnow.starship.R;
 

@@ -9,16 +9,14 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProviders;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import me.calebjones.spacelaunchnow.common.base.BaseFragment;
 import me.calebjones.spacelaunchnow.data.models.main.Event;
-import me.calebjones.spacelaunchnow.events.R;
+import me.calebjones.spacelaunchnow.events.databinding.EventsOverviewFragmentBinding;
 
 public class EventOverviewFragment extends BaseFragment {
 
     private EventDetailViewModel mViewModel;
-    private Unbinder unbinder;
+    private EventsOverviewFragmentBinding binding;
     private Context context;
 
     public static EventOverviewFragment newInstance() {
@@ -34,8 +32,8 @@ public class EventOverviewFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.events_overview_fragment, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        binding = EventsOverviewFragmentBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
         return view;
     }
 

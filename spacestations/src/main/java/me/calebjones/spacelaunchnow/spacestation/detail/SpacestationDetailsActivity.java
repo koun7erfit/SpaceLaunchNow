@@ -5,19 +5,13 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.tabs.TabLayout;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -27,55 +21,22 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import cz.kinst.jakub.view.SimpleStatefulLayout;
-import de.hdodenhof.circleimageview.CircleImageView;
 import jonathanfinerty.once.Amount;
 import jonathanfinerty.once.Once;
 import me.calebjones.spacelaunchnow.common.GlideApp;
 import me.calebjones.spacelaunchnow.common.ui.supporter.SupporterHelper;
-import me.calebjones.spacelaunchnow.common.utils.Utils;
-import me.calebjones.spacelaunchnow.spacestation.R2;
 import me.calebjones.spacelaunchnow.common.base.BaseActivityOld;
 import me.calebjones.spacelaunchnow.data.models.main.spacestation.Spacestation;
 import me.calebjones.spacelaunchnow.spacestation.R;
 import me.calebjones.spacelaunchnow.spacestation.data.Callbacks;
 import me.calebjones.spacelaunchnow.spacestation.data.SpacestationDataRepository;
+import me.calebjones.spacelaunchnow.spacestation.databinding.ActivitySpacestationDetailsBinding;
 import me.calebjones.spacelaunchnow.spacestation.detail.fragments.SpacestationDockedVehiclesFragment;
 import me.calebjones.spacelaunchnow.spacestation.detail.fragments.expeditions.SpacestationExpeditionFragment;
 import me.calebjones.spacelaunchnow.spacestation.detail.fragments.detail.SpacestationDetailFragment;
 import timber.log.Timber;
 
 public class SpacestationDetailsActivity extends BaseActivityOld implements AppBarLayout.OnOffsetChangedListener, SwipeRefreshLayout.OnRefreshListener {
-
-
-    @BindView(R2.id.spacestation_profile_backdrop)
-    ImageView spacestationProfileBackdrop;
-    @BindView(R2.id.spacestation_collapsing)
-    CollapsingToolbarLayout spacestationCollapsing;
-    @BindView(R2.id.spacestation_profile_image)
-    CircleImageView spacestationProfileImage;
-    @BindView(R2.id.spacestation_detail_toolbar)
-    Toolbar toolbar;
-    @BindView(R2.id.spacestation_title)
-    TextView spacestationTitle;
-    @BindView(R2.id.spacestation_subtitle)
-    TextView spacestationSubtitle;
-    @BindView(R2.id.spacestation_detail_tabs)
-    TabLayout tabs;
-    @BindView(R2.id.appbar)
-    AppBarLayout appbar;
-    @BindView(R2.id.spacestation_detail_viewpager)
-    ViewPager viewPager;
-    @BindView(R2.id.spacestation_adView)
-    AdView spacestationAdView;
-    @BindView(R2.id.spacestation_stateful_view)
-    SimpleStatefulLayout spacestationStatefulView;
-    @BindView(R2.id.spacestation_detail_swipe_refresh)
-    SwipeRefreshLayout swipeRefreshLayout;
-    @BindView(R2.id.rootview)
-    CoordinatorLayout rootview;
 
     private static final int PERCENTAGE_TO_ANIMATE_AVATAR = 20;
     private boolean mIsAvatarShown = true;
@@ -91,23 +52,25 @@ public class SpacestationDetailsActivity extends BaseActivityOld implements AppB
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private SpacestationDataRepository spacestationDataRepository;
     private SpacestationDetailViewModel viewModel;
-    private Spacestation spacestation;
     private int spacestationId;
+    private ActivitySpacestationDetailsBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_spacestation_details);
-        ButterKnife.bind(this);
+        binding = ActivitySpacestationDetailsBinding.inflate(getLayoutInflater());
+        View view = binding.getRoot();
+        setContentView(view);
 
-        setSupportActionBar(toolbar);
+        setSupportActionBar(binding.spacestationDetailToolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        swipeRefreshLayout.setOnRefreshListener(this);
-        viewPager.setAdapter(mSectionsPagerAdapter);
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabs));
-        viewPager.addOnPageChangeListener( new ViewPager.OnPageChangeListener() {
+        binding.spacestationDetailSwipeRefresh.setOnRefreshListener(this);
+        binding.spacestationDetailViewpager.setAdapter(mSectionsPagerAdapter);
+        binding.spacestationDetailViewpager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(binding.spacestationDetailTabs));
+        binding.spacestationDetailViewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled( int position, float v, int i1 ) {
             }
@@ -121,10 +84,10 @@ public class SpacestationDetailsActivity extends BaseActivityOld implements AppB
                 enableDisableSwipeRefresh( state == ViewPager.SCROLL_STATE_IDLE );
             }
         } );
-        tabs.addTab(tabs.newTab().setText(getString(R.string.details)));
-        tabs.addTab(tabs.newTab().setText(getString(R.string.expeditions)));
-        tabs.addTab(tabs.newTab().setText(getString(R.string.docked_alt)));
-        tabs.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(viewPager));
+        binding.spacestationDetailTabs.addTab(binding.spacestationDetailTabs.newTab().setText(getString(R.string.details)));
+        binding.spacestationDetailTabs.addTab(binding.spacestationDetailTabs.newTab().setText(getString(R.string.expeditions)));
+        binding.spacestationDetailTabs.addTab(binding.spacestationDetailTabs.newTab().setText(getString(R.string.docked_alt)));
+        binding.spacestationDetailTabs.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(binding.spacestationDetailViewpager));
 //        tabs.setTabTextColors(Utils.getSecondaryTitleTextColor(getCyanea().getPrimary()),
 //                Utils.getTitleTextColor(getCyanea().getPrimary()));
 //        tabs.setBackgroundColor(getCyanea().getPrimary());
@@ -139,13 +102,11 @@ public class SpacestationDetailsActivity extends BaseActivityOld implements AppB
 
         fetchData(spacestationId);
 
-        if (toolbar != null) {
-            setSupportActionBar(toolbar);
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                getSupportActionBar().setHomeButtonEnabled(true);
-                getSupportActionBar().setDisplayShowTitleEnabled(false);
-            }
+        setSupportActionBar(binding.spacestationDetailToolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
         viewModel = ViewModelProviders.of(this).get(SpacestationDetailViewModel.class);
@@ -159,24 +120,22 @@ public class SpacestationDetailsActivity extends BaseActivityOld implements AppB
         if (!SupporterHelper.isSupporter() && Once.beenDone("appOpen",
                 Amount.moreThan(3))) {
             AdRequest adRequest = new AdRequest.Builder().build();
-            spacestationAdView.loadAd(adRequest);
-            spacestationAdView.setAdListener(new AdListener() {
+            binding.spacestationAdView.loadAd(adRequest);
+            binding.spacestationAdView.setAdListener(new AdListener() {
 
                 @Override
                 public void onAdLoaded() {
-                    spacestationAdView.setVisibility(View.VISIBLE);
+                    binding.spacestationAdView.setVisibility(View.VISIBLE);
                 }
 
             });
         } else {
-            spacestationAdView.setVisibility(View.GONE);
+            binding.spacestationAdView.setVisibility(View.GONE);
         }
     }
 
     private void enableDisableSwipeRefresh(boolean enable) {
-        if (swipeRefreshLayout != null) {
-            swipeRefreshLayout.setEnabled(enable);
-        }
+        binding.spacestationDetailSwipeRefresh.setEnabled(enable);
     }
 
     private void fetchData(int spacestationId) {
@@ -208,14 +167,13 @@ public class SpacestationDetailsActivity extends BaseActivityOld implements AppB
     }
 
     private void updateViews(Spacestation spacestation) {
-        this.spacestation = spacestation;
         try {
-            spacestationTitle.setText(spacestation.getName());
-            spacestationSubtitle.setText(spacestation.getType().getName());
+            binding.spacestationTitle.setText(spacestation.getName());
+            binding.spacestationSubtitle.setText(spacestation.getType().getName());
             GlideApp.with(this)
                     .load(spacestation.getImageUrl())
                     .placeholder(R.drawable.placeholder)
-                    .into(spacestationProfileImage);
+                    .into(binding.spacestationProfileImage);
         } catch (NullPointerException e) {
             Timber.e(e);
         }
@@ -237,7 +195,7 @@ public class SpacestationDetailsActivity extends BaseActivityOld implements AppB
 
         if (percentage >= PERCENTAGE_TO_ANIMATE_AVATAR && mIsAvatarShown) {
             mIsAvatarShown = false;
-            spacestationProfileImage.animate()
+            binding.spacestationProfileImage.animate()
                     .scaleY(0).scaleX(0)
                     .setDuration(300)
                     .start();
@@ -246,7 +204,7 @@ public class SpacestationDetailsActivity extends BaseActivityOld implements AppB
         if (percentage <= PERCENTAGE_TO_ANIMATE_AVATAR && !mIsAvatarShown) {
             mIsAvatarShown = true;
 
-            spacestationProfileImage.animate()
+            binding.spacestationProfileImage.animate()
                     .scaleY(1).scaleX(1)
                     .start();
         }
@@ -262,12 +220,12 @@ public class SpacestationDetailsActivity extends BaseActivityOld implements AppB
 
     private void showLoading() {
         Timber.v("Show Loading...");
-        swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(true));
+        binding.spacestationDetailSwipeRefresh.post(() -> binding.spacestationDetailSwipeRefresh.setRefreshing(true));
     }
 
     private void hideLoading() {
         Timber.v("Hide Loading...");
-        swipeRefreshLayout.post(() -> swipeRefreshLayout.setRefreshing(false));
+        binding.spacestationDetailSwipeRefresh.post(() -> binding.spacestationDetailSwipeRefresh.setRefreshing(false));
     }
 
     @Override

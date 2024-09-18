@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 import me.calebjones.spacelaunchnow.common.GlideApp;
 import me.calebjones.spacelaunchnow.common.utils.Utils;
-import me.calebjones.spacelaunchnow.data.models.main.spacestation.DockingEvent;
 import me.calebjones.spacelaunchnow.data.models.main.spacestation.DockingLocation;
 import me.calebjones.spacelaunchnow.data.models.main.spacestation.Expedition;
 import me.calebjones.spacelaunchnow.data.networking.DataClient;
@@ -34,6 +32,7 @@ public class SpacestationAdapter extends RecyclerView.Adapter<SpacestationAdapte
     public int position;
     private Context context;
     private List<ListItem> items;
+
 
     public SpacestationAdapter(Context context) {
         this.context = context;

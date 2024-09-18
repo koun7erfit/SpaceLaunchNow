@@ -7,11 +7,8 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
-import androidx.core.widget.NestedScrollView;
 import androidx.appcompat.widget.AppCompatButton;
-import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,21 +21,17 @@ import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.ConsumeParams;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.ProductDetails;
-import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.google.common.collect.ImmutableList;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchaseHistoryRecord;
-import com.android.billingclient.api.PurchaseHistoryResponseListener;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import com.android.billingclient.api.QueryPurchaseHistoryParams;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
@@ -48,43 +41,22 @@ import com.transitionseverywhere.TransitionManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import io.realm.Realm;
+
 import me.calebjones.spacelaunchnow.common.R;
-import me.calebjones.spacelaunchnow.common.R2;
 import me.calebjones.spacelaunchnow.common.base.BaseActivity;
-import me.calebjones.spacelaunchnow.data.models.Products;
+import me.calebjones.spacelaunchnow.common.databinding.ActivitySupportBinding;
 import timber.log.Timber;
 
 import static me.calebjones.spacelaunchnow.common.ui.supporter.SupporterHelper.isOwned;
 
 public class SupporterActivity extends BaseActivity {
 
-    @BindView(R2.id.purchase)
-    AppCompatButton purchaseButton;
-    @BindView(R2.id.coordinatorLayout)
-    CoordinatorLayout coordinatorLayout;
-    @BindView(R2.id.toolbar)
-    Toolbar toolbar;
-    @BindView(R2.id.app_bar_layout)
-    AppBarLayout appBarLayout;
-    @BindView(R2.id.support_thank_you)
-    View supportThankYou;
-    @BindView(R2.id.fab_supporter)
-    FloatingActionButton fabSupporter;
-    @BindView(R2.id.nested_scroll_view)
-    NestedScrollView nestedScrollView;
-    @BindView(R2.id.detail_title)
-    TextView title;
-    @BindView(R2.id.detail_sub_title)
-    TextView subtitle;
 
     private boolean isAvailable = false;
     private boolean isRefreshable = true;
     private Dialog dialog;
     private List<String> ownedProducts;
+    private ActivitySupportBinding binding;
 
 
     private PurchasesUpdatedListener purchasesUpdatedListener = (billingResult, purchases) -> {
@@ -128,29 +100,30 @@ public class SupporterActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        binding = ActivitySupportBinding.inflate(getLayoutInflater());
+        View view = binding.getRoot();
+        setContentView(view);
+
         context = this;
 
-        setContentView(R.layout.activity_support);
-        ButterKnife.bind(this);
         ownedProducts = new ArrayList<>();
 
-
         if (SupporterHelper.is2024Supporter()) {
-            purchaseButton.setText(R.string.support_us_2022);
-            title.setText("Thank You!");
-            subtitle.setText("Here's to another year...");
+            binding.purchase.setText(R.string.support_us_2022);
+            binding.detailTitle.setText("Thank You!");
+            binding.detailSubTitle.setText("Here's to another year...");
         } else if (SupporterHelper.isSupporter() && !SupporterHelper.is2024Supporter()) {
-            purchaseButton.setText(R.string.support_again_2024);
-            title.setText("Become a 2024 Supporter");
-            subtitle.setText("Continue Your Support!");
+            binding.purchase.setText(R.string.support_again_2024);
+            binding.detailTitle.setText("Become a 2024 Supporter");
+            binding.detailSubTitle.setText("Continue Your Support!");
         } else {
-            title.setText("Become a Supporter");
-            subtitle.setText("Get Pro Features");
-            purchaseButton.setText(R.string.supporter_title_2022);
+            binding.purchase.setText(R.string.supporter_title_2022);
+            binding.detailTitle.setText("Become a Supporter");
+            binding.detailSubTitle.setText("Get Pro Features");
         }
-        setSupportActionBar(toolbar);
+        setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        toolbar.setTitle("");
+        binding.toolbar.setTitle("");
 
         billingClient = BillingClient.newBuilder(context)
                 .setListener(purchasesUpdatedListener)
@@ -175,6 +148,8 @@ public class SupporterActivity extends BaseActivity {
             }
         });
 
+        binding.purchase.setOnClickListener(v -> checkClick());
+        binding.fabSupporter.setOnClickListener(v -> checkClick());
     }
 
     private void restorePurchases() {
@@ -188,7 +163,7 @@ public class SupporterActivity extends BaseActivity {
                     // process returned purchase history list, e.g. display purchase history
                     Timber.v(billingResult.getDebugMessage());
                     if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                        if (purchasesHistoryList.size() > 0) {
+                        if (purchasesHistoryList != null && !purchasesHistoryList.isEmpty()) {
                             for (PurchaseHistoryRecord purchase : purchasesHistoryList) {
                                 handlePurchaseHistoryRecord(purchase);
                             }
@@ -266,7 +241,6 @@ public class SupporterActivity extends BaseActivity {
         return true;
     }
 
-    @OnClick({R2.id.purchase, R2.id.fab_supporter})
     public void checkClick() {
         if (billingClient.isReady()) {
             QueryProductDetailsParams queryProductDetailsParams =
@@ -475,20 +449,20 @@ public class SupporterActivity extends BaseActivity {
 
     private void animatePurchase() {
         runOnUiThread(() -> {
-            if (supportThankYou.getVisibility() != View.VISIBLE) {
-                enterReveal(supportThankYou);
+            if (binding.supportThankYou.getVisibility() != View.VISIBLE) {
+                enterReveal(binding.supportThankYou);
                 if (SupporterHelper.is2024Supporter()) {
-                    purchaseButton.setText(R.string.support_us_2022);
-                    title.setText("Thank You!");
-                    subtitle.setText("Here's to another year...");
+                    binding.purchase.setText(R.string.support_us_2022);
+                    binding.detailTitle.setText("Thank You!");
+                    binding.detailSubTitle.setText("Here's to another year...");
                 } else if (SupporterHelper.isSupporter() && !SupporterHelper.is2024Supporter()) {
-                    purchaseButton.setText(R.string.support_again_2024);
-                    title.setText("Become a 2024 Supporter");
-                    subtitle.setText("Continue Your Support!");
+                    binding.purchase.setText(R.string.support_again_2024);
+                    binding.detailTitle.setText("Become a 2024 Supporter");
+                    binding.detailSubTitle.setText("Continue Your Support!");
                 } else {
-                    title.setText("Become a Supporter");
-                    subtitle.setText("Get Pro Features");
-                    purchaseButton.setText(R.string.supporter_title_2022);
+                    binding.purchase.setText(R.string.supporter_title_2022);
+                    binding.detailTitle.setText("Become a Supporter");
+                    binding.detailSubTitle.setText("Get Pro Features");
                 }
             }
         });
@@ -505,7 +479,7 @@ public class SupporterActivity extends BaseActivity {
                     AppBarLayout.LayoutParams.MATCH_PARENT,
                     AppBarLayout.LayoutParams.WRAP_CONTENT
             ));
-            TransitionManager.beginDelayedTransition(coordinatorLayout);
+            TransitionManager.beginDelayedTransition(binding.coordinatorLayout);
             myView.setVisibility(View.VISIBLE);
         });
     }

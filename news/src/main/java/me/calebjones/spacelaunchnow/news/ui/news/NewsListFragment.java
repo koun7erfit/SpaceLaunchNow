@@ -14,17 +14,15 @@ import java.util.List;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import butterknife.Unbinder;
-import cz.kinst.jakub.view.SimpleStatefulLayout;
 import io.realm.RealmResults;
 import me.calebjones.spacelaunchnow.common.base.BaseFragment;
 import me.calebjones.spacelaunchnow.data.models.main.news.NewsItem;
 import me.calebjones.spacelaunchnow.news.R;
 import me.calebjones.spacelaunchnow.data.networking.news.data.Callbacks;
 import me.calebjones.spacelaunchnow.data.networking.news.data.NewsDataRepository;
+import me.calebjones.spacelaunchnow.news.databinding.FragmentNewsListBinding;
 import timber.log.Timber;
 
 /**
@@ -40,15 +38,12 @@ public class NewsListFragment extends BaseFragment implements SwipeRefreshLayout
     private boolean canLoadMore;
     private boolean statefulStateContentShow = false;
     private boolean firstLaunch = true;
-    private Unbinder unbinder;
     private NewsRecyclerViewAdapter adapter;
     private LinearLayoutManager linearLayoutManager;
     private StaggeredGridLayoutManager layoutManager;
     private List<Integer> statusIDs;
     private Integer[] statusIDsSelection;
-    private RecyclerView recyclerView;
-    private SimpleStatefulLayout statefulView;
-    private SwipeRefreshLayout swipeRefreshLayout;
+    private FragmentNewsListBinding binding;
 
 
     /**
@@ -73,10 +68,9 @@ public class NewsListFragment extends BaseFragment implements SwipeRefreshLayout
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_news_list, container, false);
-        recyclerView = view.findViewById(R.id.news_recycler_view);
-        swipeRefreshLayout = view.findViewById(R.id.news_refresh_layout);
-        statefulView = view.findViewById(R.id.news_stateful_view);
+        binding = FragmentNewsListBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
+
         setHasOptionsMenu(true);
 
         // Set the adapter
@@ -84,19 +78,19 @@ public class NewsListFragment extends BaseFragment implements SwipeRefreshLayout
         adapter = new NewsRecyclerViewAdapter(context);
         layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
 
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
+        binding.newsRecyclerView.setLayoutManager(layoutManager);
+        binding.newsRecyclerView.setAdapter(adapter);
         if (firstLaunch) {
-            statefulView.showProgress();
+            binding.newsStatefulView.showProgress();
         } else {
-            statefulView.showContent();
+            binding.newsStatefulView.showContent();
         }
 
         canLoadMore = true;
-        statefulView.setOfflineRetryOnClickListener(v -> onRefresh());
+        binding.newsStatefulView.setOfflineRetryOnClickListener(v -> onRefresh());
         fetchData(false, firstLaunch, false);
         firstLaunch = false;
-        swipeRefreshLayout.setOnRefreshListener(this);
+        binding.newsRefreshLayout.setOnRefreshListener(this);
         return view;
     }
 
@@ -128,7 +122,7 @@ public class NewsListFragment extends BaseFragment implements SwipeRefreshLayout
             @Override
             public void onError(String message, @Nullable Throwable throwable) {
                 if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-                    statefulView.showOffline();
+                    binding.newsStatefulView.showOffline();
                     statefulStateContentShow = false;
                     if (throwable != null) {
                         Timber.e(throwable);
@@ -142,19 +136,19 @@ public class NewsListFragment extends BaseFragment implements SwipeRefreshLayout
 
 
     private void showNetworkLoading(boolean refreshing) {
-        swipeRefreshLayout.setRefreshing(refreshing);
+        binding.newsRefreshLayout.setRefreshing(refreshing);
     }
 
     private void updateAdapter(List<NewsItem> news) {
 
         if (news.size() > 0) {
             if (!statefulStateContentShow) {
-                statefulView.showContent();
+                binding.newsStatefulView.showContent();
                 statefulStateContentShow = true;
             }
             adapter.addItems(news);
         } else {
-            statefulView.showEmpty();
+            binding.newsStatefulView.showEmpty();
             statefulStateContentShow = false;
             if (adapter != null) {
                 adapter.clear();
@@ -188,7 +182,7 @@ public class NewsListFragment extends BaseFragment implements SwipeRefreshLayout
         if (searchTerm != null || statusIDs != null) {
             statusIDs = null;
             searchTerm = null;
-            swipeRefreshLayout.setRefreshing(false);
+            binding.newsRefreshLayout.setRefreshing(false);
             fetchData(false, false, false);
         } else {
             fetchData(true, false, false);

@@ -6,20 +6,14 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
-
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import io.realm.RealmList;
 import me.calebjones.spacelaunchnow.common.GlideApp;
 import me.calebjones.spacelaunchnow.common.R;
-import me.calebjones.spacelaunchnow.common.R2;
-import me.calebjones.spacelaunchnow.common.utils.Utils;
+import me.calebjones.spacelaunchnow.common.databinding.NewsListItemBinding;
 import me.calebjones.spacelaunchnow.data.models.main.news.NewsItem;
 import timber.log.Timber;
 
@@ -30,6 +24,7 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     public int position;
     private RealmList<NewsItem> newsList;
     private Context mContext;
+    private NewsListItemBinding binding;
 
     public NewsListAdapter(Context context) {
         newsList = new RealmList<>();
@@ -56,8 +51,8 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         Timber.v("onCreate ViewHolder.");
-        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.news_list_item, viewGroup, false);
-        return new ViewHolder(v);
+        binding = NewsListItemBinding.inflate(LayoutInflater.from(viewGroup.getContext()), viewGroup, false);
+        return new ViewHolder(binding);
     }
 
     @Override
@@ -69,10 +64,10 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
                     .placeholder(R.drawable.placeholder)
                     .thumbnail(0.5f)
                     .circleCrop()
-                    .into(holder.newsIcon);
+                    .into(holder.binding.newsIcon);
         }
-        holder.title.setText(item.getTitle());
-        holder.subtitle.setText(item.getNewsSite());
+        holder.binding.newsTitle.setText(item.getTitle());
+        holder.binding.newsSubtitle.setText(item.getNewsSite());
     }
 
     @Override
@@ -81,21 +76,15 @@ public class NewsListAdapter extends RecyclerView.Adapter<NewsListAdapter.ViewHo
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        @BindView(R2.id.news_subtitle)
-        TextView subtitle;
-        @BindView(R2.id.news_title)
-        TextView title;
-        @BindView(R2.id.news_icon)
-        ImageView newsIcon;
-        @BindView(R2.id.rootView)
-        View rootView;
+
+        private NewsListItemBinding binding;
 
 
         //Add content to the card
-        public ViewHolder(View view) {
-            super(view);
-            ButterKnife.bind(this, view);
-            rootView.setOnClickListener(this);
+        public ViewHolder(NewsListItemBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+            binding.getRoot().setOnClickListener(this);
         }
 
         //React to click events.

@@ -2,12 +2,10 @@ package me.calebjones.spacelaunchnow.ui.main.next;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -19,14 +17,9 @@ import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.google.android.material.button.MaterialButton;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatButton;
-import androidx.appcompat.widget.AppCompatCheckBox;
-import androidx.appcompat.widget.AppCompatImageView;
-import androidx.appcompat.widget.SwitchCompat;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
+
 import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.Lifecycle;
@@ -35,14 +28,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import butterknife.Unbinder;
 import io.realm.RealmResults;
 import jonathanfinerty.once.Once;
-import me.calebjones.spacelaunchnow.BuildConfig;
 import me.calebjones.spacelaunchnow.R;
+import me.calebjones.spacelaunchnow.common.BuildConfig;
 import me.calebjones.spacelaunchnow.common.base.BaseFragment;
 import me.calebjones.spacelaunchnow.common.content.calendar.CalendarSyncManager;
 import me.calebjones.spacelaunchnow.common.content.data.Callbacks;
@@ -53,6 +42,8 @@ import me.calebjones.spacelaunchnow.common.ui.supporter.SupporterHelper;
 import me.calebjones.spacelaunchnow.common.ui.views.SnackbarHandler;
 import me.calebjones.spacelaunchnow.content.data.next.NextLaunchDataRepository;
 import me.calebjones.spacelaunchnow.data.models.main.Launch;
+import me.calebjones.spacelaunchnow.databinding.ColorRevealBinding;
+import me.calebjones.spacelaunchnow.databinding.FragmentUpcomingBinding;
 import me.calebjones.spacelaunchnow.ui.debug.DebugActivity;
 import me.calebjones.spacelaunchnow.ui.main.MainActivity;
 import me.calebjones.spacelaunchnow.common.utils.analytics.Analytics;
@@ -70,78 +61,6 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
     private static final int FAB_MODE_FILTER = 1;
     private static final int FAB_MODE_CLOSE = 2;
     private static final int FAB_MODE_APPLY = 3;
-    @BindView(R.id.strict_switch)
-    SwitchCompat strictSwitch;
-    @BindView(R.id.misc_switch)
-    AppCompatCheckBox miscSwitch;
-    @BindView(R.id.texas_switch)
-    AppCompatCheckBox texasSwitch;
-    @BindView(R.id.kodiak_switch)
-    AppCompatCheckBox kodiakSwitch;
-    @BindView(R.id.van_switch)
-    AppCompatCheckBox vanSwitch;
-    @BindView(R.id.ples_switch)
-    AppCompatCheckBox plesSwitch;
-    @BindView(R.id.KSC_switch)
-    AppCompatCheckBox kscSwitch;
-    @BindView(R.id.nasa_switch)
-    AppCompatCheckBox nasaSwitch;
-    @BindView(R.id.spacex_switch)
-    AppCompatCheckBox spacexSwitch;
-    @BindView(R.id.roscosmos_switch)
-    AppCompatCheckBox roscosmosSwitch;
-    @BindView(R.id.bo_switch)
-    AppCompatCheckBox blueOriginSwitch;
-    @BindView(R.id.rl_switch)
-    AppCompatCheckBox rocketLabsSwitch;
-    @BindView(R.id.ula_switch)
-    AppCompatCheckBox ulaSwitch;
-    @BindView(R.id.arianespace_switch)
-    AppCompatCheckBox arianespaceSwitch;
-    @BindView(R.id.china_switch)
-    AppCompatCheckBox cascSwitch;
-    @BindView(R.id.india_switch)
-    AppCompatCheckBox isroSwitch;
-    @BindView(R.id.northrop_switch)
-    AppCompatCheckBox northropSwitch;
-    @BindView(R.id.wallops_switch)
-    AppCompatCheckBox wallopsSwitch;
-    @BindView(R.id.new_zealand_switch)
-    AppCompatCheckBox newZealandSwitch;
-    @BindView(R.id.japan_switch)
-    AppCompatCheckBox japanSwitch;
-    @BindView(R.id.fg_switch)
-    AppCompatCheckBox frenchGuianaSwitch;
-    @BindView(R.id.all_switch)
-    SwitchCompat allSwitch;
-    @BindView(R.id.all_info)
-    AppCompatImageView allInfo;
-    @BindView(R.id.tbd_launch)
-    SwitchCompat tbdLaunchSwitch;
-    @BindView(R.id.persist_last_launch)
-    SwitchCompat persistLastSwitch;
-    @BindView(R.id.tbd_info)
-    AppCompatImageView noGoInfo;
-    @BindView(R.id.last_launch_info)
-    AppCompatImageView lastLaunchInfo;
-    @BindView(R.id.action_notification_settings)
-    AppCompatButton notificationsSettings;
-    @BindView(R.id.view_more_launches)
-    AppCompatButton viewMoreLaunches;
-    @BindView(R.id.recycler_view_root)
-    NestedScrollView nestedScrollView;
-    @BindView(R.id.no_launches)
-    View no_data;
-    @BindView(R.id.fab)
-    MaterialButton fab;
-    @BindView(R.id.recycler_view)
-    RecyclerView mRecyclerView;
-    @BindView(R.id.coordinatorLayout)
-    CoordinatorLayout coordinatorLayout;
-    @BindView(R.id.activity_main_swipe_refresh_layout)
-    SwipeRefreshLayout mSwipeRefreshLayout;
-    @BindView(R.id.color_reveal)
-    CoordinatorLayout colorReveal;
 
     private View view;
     private CardAdapter adapter;
@@ -160,7 +79,8 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
     private boolean switchChanged;
     private FabExtensionAnimator fabExtensionAnimator;
     private MainActivity mainActivity;
-    Unbinder unbinder;
+    private FragmentUpcomingBinding binding;
+    private ColorRevealBinding colorRevealBinding;
 
     public static NextLaunchFragment newInstance() {
 
@@ -185,7 +105,6 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        //getActivity() is fully created in onActivityCreated and instanceOf differentiate it between different Activities
         if (getActivity() instanceof CallBackListener)
             callBackListener = (CallBackListener) getActivity();
     }
@@ -194,6 +113,9 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        binding = FragmentUpcomingBinding.inflate(inflater, container, false);
+        colorRevealBinding = binding.colorReveal;
+
         filterViewShowing = false;
 
         if (adapter == null) {
@@ -203,41 +125,38 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
         super.onCreateView(inflater, container, savedInstanceState);
 
         setHasOptionsMenu(true);
-        view = inflater.inflate(R.layout.fragment_upcoming, container, false);
-        unbinder = ButterKnife.bind(this, view);
-
         setUpSwitches();
 
-        fabExtensionAnimator = new FabExtensionAnimator(fab);
+        fabExtensionAnimator = new FabExtensionAnimator(binding.fab);
         fabExtensionAnimator.updateGlyphs(FabExtensionAnimator.newState("Filters",
                 ContextCompat.getDrawable(context, R.drawable.ic_notifications_white)),
                 true);
         if (!Once.beenDone(Once.THIS_APP_INSTALL, "showFilters")) {
             Once.markDone("showFilters");
-            colorReveal.setVisibility(View.VISIBLE);
+            binding.colorReveal.getRoot().setVisibility(View.VISIBLE);
             filterViewShowing = true;
             fabExtensionAnimator.updateGlyphs(FabExtensionAnimator.newState("Close",
                     ContextCompat.getDrawable(context, R.drawable.ic_close)),
                     true);
 
             mainActivity.checkHideAd();
-            mSwipeRefreshLayout.setEnabled(false);
+            binding.activityMainSwipeRefreshLayout.setEnabled(false);
         }
-        fab.setOnClickListener(v -> checkFilter());
-        fab.setVisibility(View.GONE);
+        binding.fab.setOnClickListener(v -> checkFilter());
+        binding.fab.setVisibility(View.GONE);
         if (switchPreferences.getNextFABHidden()) {
-            fab.setVisibility(View.GONE);
+            binding.fab.setVisibility(View.GONE);
         } else {
-            fab.setVisibility(View.VISIBLE);
+            binding.fab.setVisibility(View.VISIBLE);
         }
 
-        mRecyclerView.setHasFixedSize(true);
+        binding.recyclerView.setHasFixedSize(true);
 
         //If preference is for small card, landscape tablets get three others get two.
         linearLayoutManager = new LinearLayoutManager(context.getApplicationContext(), RecyclerView.VERTICAL, false);
-        mRecyclerView.setLayoutManager(linearLayoutManager);
-        mRecyclerView.setAdapter(adapter);
-        nestedScrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+        binding.recyclerView.setLayoutManager(linearLayoutManager);
+        binding.recyclerView.setAdapter(adapter);
+        binding.recyclerViewRoot.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
             int dy = Math.abs(scrollY - oldScrollY);
             if (!isFilterShown()) {
                 if (scrollY > 4) {
@@ -248,14 +167,60 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
             }
         });
 
-
         /*Set up Pull to refresh*/
-        mSwipeRefreshLayout.setOnRefreshListener(this);
+        binding.activityMainSwipeRefreshLayout.setOnRefreshListener(this);
 
         //Enable no data by default
-        no_data.setVisibility(View.VISIBLE);
-        viewMoreLaunches.setVisibility(View.GONE);
-        return view;
+        binding.noLaunches.setVisibility(View.VISIBLE);
+        binding.viewMoreLaunches.setVisibility(View.GONE);
+        binding.colorReveal.actionNotificationSettings.setOnClickListener(view -> onNotificationSettingsClicked());
+        colorRevealBinding.allSwitch.setOnClickListener(view -> all_switch());
+        colorRevealBinding.nasaSwitch.setOnClickListener(view -> nasa_switch());
+        colorRevealBinding.spacexSwitch.setOnClickListener(view -> spacex_switch());
+        colorRevealBinding.roscosmosSwitch.setOnClickListener(view -> roscosmos_switch());
+        colorRevealBinding.ulaSwitch.setOnClickListener(view -> ula_switch());
+        colorRevealBinding.arianespaceSwitch.setOnClickListener(view -> arianespace_switch());
+        colorRevealBinding.chinaSwitch.setOnClickListener(view -> china_switch());
+        colorRevealBinding.indiaSwitch.setOnClickListener(view -> india_switch());
+        colorRevealBinding.plesSwitch.setOnClickListener(view -> ples_switch());
+        colorRevealBinding.vanSwitch.setOnClickListener(view -> van_switch());
+        colorRevealBinding.KSCSwitch.setOnClickListener(view -> KSC_switch());
+        colorRevealBinding.boSwitch.setOnClickListener(view -> bo_switch());
+        colorRevealBinding.rlSwitch.setOnClickListener(view -> rl_switch());
+        colorRevealBinding.northropSwitch.setOnClickListener(view -> northrop_switch());
+        colorRevealBinding.wallopsSwitch.setOnClickListener(view -> wallops_switch());
+        colorRevealBinding.newZealandSwitch.setOnClickListener(view -> new_zealand_switch());
+        colorRevealBinding.fgSwitch.setOnClickListener(view -> french_guiana_switch());
+        colorRevealBinding.japanSwitch.setOnClickListener(view -> japan_switch());
+        colorRevealBinding.texasSwitch.setOnClickListener(view -> texas_switch());
+        colorRevealBinding.kodiakSwitch.setOnClickListener(view -> kodiak_switch());
+
+        colorRevealBinding.strictSwitch.setOnClickListener(view -> strict_switch());
+        colorRevealBinding.tbdLaunch.setOnClickListener(view -> noGoSwitch());
+        colorRevealBinding.miscSwitch.setOnClickListener(view -> miscSwitch());
+        colorRevealBinding.persistLastLaunch.setOnClickListener(view -> setPersistLastSwitch());
+
+        colorRevealBinding.allInfo.setOnClickListener(view -> createDialog(
+                R.string.follow_all_launches,
+                R.string.follow_all_launches_description
+        ));
+        colorRevealBinding.lastLaunchInfo.setOnClickListener(view -> createDialog(
+                R.string.launch_info,
+                R.string.launch_info_description
+        ));
+        colorRevealBinding.otherInfo.setOnClickListener(view -> createDialog(
+                R.string.strict_matching_title,
+                R.string.strict_matching
+        ));
+        colorRevealBinding.tbdInfo.setOnClickListener(view -> createDialog(
+                R.string.no_go,
+                R.string.no_go_description));
+
+//        @OnClick({R.id.view_more_launches, R.id.view_more_launches2})
+        binding.viewMoreLaunches.setOnClickListener(view -> onViewClicked());
+        binding.viewMoreLaunches2.setOnClickListener(view -> onViewClicked());
+
+        return binding.getRoot();
     }
 
     private void setFabExtended(boolean extended) {
@@ -281,62 +246,62 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
         if (!isDetached() && isAdded()) {
             linearLayoutManager = new LinearLayoutManager(context.getApplicationContext(),
                     RecyclerView.VERTICAL, false);
-            mRecyclerView.setLayoutManager(linearLayoutManager);
-            mRecyclerView.setAdapter(adapter);
+            binding.recyclerView.setLayoutManager(linearLayoutManager);
+            binding.recyclerView.setAdapter(adapter);
         } else if (isDetached()) {
             Timber.v("View is detached.");
         }
     }
 
     private void setUpSwitches() {
-        allSwitch.setChecked(switchPreferences.getAllSwitch());
-        nasaSwitch.setChecked(switchPreferences.getSwitchNasa());
-        spacexSwitch.setChecked(switchPreferences.getSwitchSpaceX());
-        roscosmosSwitch.setChecked(switchPreferences.getSwitchRoscosmos());
-        ulaSwitch.setChecked(switchPreferences.getSwitchULA());
-        arianespaceSwitch.setChecked(switchPreferences.getSwitchArianespace());
-        cascSwitch.setChecked(switchPreferences.getSwitchCASC());
-        isroSwitch.setChecked(switchPreferences.getSwitchISRO());
-        plesSwitch.setChecked(switchPreferences.getSwitchRussia());
-        vanSwitch.setChecked(switchPreferences.getSwitchVan());
-        kscSwitch.setChecked(switchPreferences.getSwitchKSC());
-        blueOriginSwitch.setChecked(switchPreferences.getSwitchBO());
-        rocketLabsSwitch.setChecked(switchPreferences.getSwitchRL());
-        tbdLaunchSwitch.setChecked(switchPreferences.getTBDSwitch());
-        northropSwitch.setChecked(switchPreferences.getSwitchNorthrop());
-        wallopsSwitch.setChecked(switchPreferences.getSwitchWallops());
-        newZealandSwitch.setChecked(switchPreferences.getSwitchNZ());
-        frenchGuianaSwitch.setChecked(switchPreferences.getSwitchFG());
-        japanSwitch.setChecked(switchPreferences.getSwitchJapan());
-        persistLastSwitch.setChecked(switchPreferences.getPersistSwitch());
-        texasSwitch.setChecked(switchPreferences.getSwitchTexas());
-        kodiakSwitch.setChecked(switchPreferences.getSwitchKodiak());
-        miscSwitch.setChecked(switchPreferences.getSwitchOtherLocations());
-        strictSwitch.setChecked(switchPreferences.getSwitchStrictMatching());
+        colorRevealBinding.allSwitch.setChecked(switchPreferences.getAllSwitch());
+        colorRevealBinding.nasaSwitch.setChecked(switchPreferences.getSwitchNasa());
+        colorRevealBinding.spacexSwitch.setChecked(switchPreferences.getSwitchSpaceX());
+        colorRevealBinding.roscosmosSwitch.setChecked(switchPreferences.getSwitchRoscosmos());
+        colorRevealBinding.ulaSwitch.setChecked(switchPreferences.getSwitchULA());
+        colorRevealBinding.arianespaceSwitch.setChecked(switchPreferences.getSwitchArianespace());
+        colorRevealBinding.chinaSwitch.setChecked(switchPreferences.getSwitchCASC());
+        colorRevealBinding.indiaSwitch.setChecked(switchPreferences.getSwitchISRO());
+        colorRevealBinding.plesSwitch.setChecked(switchPreferences.getSwitchRussia());
+        colorRevealBinding.vanSwitch.setChecked(switchPreferences.getSwitchVan());
+        colorRevealBinding.KSCSwitch.setChecked(switchPreferences.getSwitchKSC());
+        colorRevealBinding.boSwitch.setChecked(switchPreferences.getSwitchBO());
+        colorRevealBinding.rlSwitch.setChecked(switchPreferences.getSwitchRL());
+        colorRevealBinding.tbdLaunch.setChecked(switchPreferences.getTBDSwitch());
+        colorRevealBinding.northropSwitch.setChecked(switchPreferences.getSwitchNorthrop());
+        colorRevealBinding.wallopsSwitch.setChecked(switchPreferences.getSwitchWallops());
+        colorRevealBinding.newZealandSwitch.setChecked(switchPreferences.getSwitchNZ());
+        colorRevealBinding.fgSwitch.setChecked(switchPreferences.getSwitchFG());
+        colorRevealBinding.japanSwitch.setChecked(switchPreferences.getSwitchJapan());
+        colorRevealBinding.persistLastLaunch.setChecked(switchPreferences.getPersistSwitch());
+        colorRevealBinding.texasSwitch.setChecked(switchPreferences.getSwitchTexas());
+        colorRevealBinding.kodiakSwitch.setChecked(switchPreferences.getSwitchKodiak());
+        colorRevealBinding.miscSwitch.setChecked(switchPreferences.getSwitchOtherLocations());
+        colorRevealBinding.strictSwitch.setChecked(switchPreferences.getSwitchStrictMatching());
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void hideView() {
         try {
             // get the center for the clipping circle
-            int x = (int) (fab.getX() + fab.getWidth() / 2);
-            int y = (int) (fab.getY() + fab.getHeight() / 2);
+            int x = (int) (binding.fab.getX() + binding.fab.getWidth() / 2);
+            int y = (int) (binding.fab.getY() + binding.fab.getHeight() / 2);
 
             // get the initial radius for the clipping circle
-            int initialRadius = Math.max(colorReveal.getWidth(), colorReveal.getHeight());
+            int initialRadius = Math.max(
+                    binding.colorReveal.getRoot().getWidth(),
+                    binding.colorReveal.getRoot().getHeight());
 
             // create the animation (the final radius is zero)
             Animator anim =
-                    ViewAnimationUtils.createCircularReveal(colorReveal, x, y, initialRadius, 0);
+                    ViewAnimationUtils.createCircularReveal(binding.colorReveal.getRoot(), x, y, initialRadius, 0);
 
             // make the view invisible when the animation is done
             anim.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
-                    if (colorReveal != null) {
-                        colorReveal.setVisibility(View.INVISIBLE);
-                    }
+                    binding.colorReveal.getRoot();
+                    binding.colorReveal.getRoot().setVisibility(View.INVISIBLE);
                 }
             });
 
@@ -345,24 +310,23 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
 
 
             mainActivity.checkShowAd();
-            mSwipeRefreshLayout.setEnabled(true);
+            binding.activityMainSwipeRefreshLayout.setEnabled(true);
         } catch (IllegalStateException exception) {
             Timber.e(exception);
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void showView() {
         try {
             // get the center for the clipping circle
-            int x = (int) (fab.getX() + fab.getWidth() / 2);
-            int y = (int) (fab.getY() + fab.getHeight() / 2);
+            int x = (int) (binding.fab.getX() + binding.fab.getWidth() / 2);
+            int y = (int) (binding.fab.getY() + binding.fab.getHeight() / 2);
 
             // get the final radius for the clipping circle
-            int finalRadius = Math.max(colorReveal.getWidth(), colorReveal.getHeight());
+            int finalRadius = Math.max(binding.colorReveal.getRoot().getWidth(), binding.colorReveal.getRoot().getHeight());
 
             // create the animator for this view (the start radius is zero)
-            Animator anim = ViewAnimationUtils.createCircularReveal(colorReveal, x, y, 0, finalRadius);
+            Animator anim = ViewAnimationUtils.createCircularReveal(binding.colorReveal.getRoot(), x, y, 0, finalRadius);
 
             // make the view invisible when the animation is done
             anim.addListener(new AnimatorListenerAdapter() {
@@ -373,11 +337,11 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
                 }
             });
 
-            colorReveal.setVisibility(View.VISIBLE);
+            binding.colorReveal.getRoot().setVisibility(View.VISIBLE);
             anim.start();
 
             mainActivity.checkHideAd();
-            mSwipeRefreshLayout.setEnabled(false);
+            binding.activityMainSwipeRefreshLayout.setEnabled(false);
         } catch (IllegalStateException exception) {
             Timber.e(exception);
         }
@@ -412,11 +376,11 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
                 } else {
                     Timber.e(message);
                     if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-                        SnackbarHandler.showErrorSnackbar(context, coordinatorLayout, message);
+                        SnackbarHandler.showErrorSnackbar(context, binding.coordinatorLayout, message);
                     }
                 }
                 if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-                    SnackbarHandler.showErrorSnackbar(context, coordinatorLayout, message);
+                    SnackbarHandler.showErrorSnackbar(context, binding.coordinatorLayout, message);
                 }
             }
         });
@@ -426,22 +390,22 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
         adapter.clear();
         preferredCount = 5;
         if (launches.size() >= preferredCount) {
-            no_data.setVisibility(View.GONE);
-            viewMoreLaunches.setVisibility(View.VISIBLE);
+            binding.noLaunches.setVisibility(View.GONE);
+            binding.viewMoreLaunches.setVisibility(View.VISIBLE);
             setLayoutManager(preferredCount);
             adapter.addItems(launches.subList(0, preferredCount));
             adapter.notifyDataSetChanged();
 
-        } else if (launches.size() > 0) {
-            no_data.setVisibility(View.GONE);
-            viewMoreLaunches.setVisibility(View.VISIBLE);
+        } else if (!launches.isEmpty()) {
+            binding.noLaunches.setVisibility(View.GONE);
+            binding.viewMoreLaunches.setVisibility(View.VISIBLE);
             setLayoutManager(preferredCount);
             adapter.addItems(launches);
             adapter.notifyDataSetChanged();
 
         } else {
-            no_data.setVisibility(View.VISIBLE);
-            viewMoreLaunches.setVisibility(View.GONE);
+            binding.noLaunches.setVisibility(View.VISIBLE);
+            binding.viewMoreLaunches.setVisibility(View.GONE);
             if (adapter != null) {
                 adapter.clear();
             }
@@ -458,22 +422,18 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
 
     private void showLoading() {
         Timber.v("Show Loading...");
-        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED) && mSwipeRefreshLayout != null) {
-            mSwipeRefreshLayout.post(() -> {
-                if (mSwipeRefreshLayout != null) {
-                    mSwipeRefreshLayout.setRefreshing(true);
-                }
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
+            binding.activityMainSwipeRefreshLayout.post(() -> {
+                binding.activityMainSwipeRefreshLayout.setRefreshing(true);
             });
         }
     }
 
     private void hideLoading() {
         Timber.v("Hide Loading...");
-        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED) && mSwipeRefreshLayout != null) {
-            mSwipeRefreshLayout.post(() -> {
-                if (mSwipeRefreshLayout != null) {
-                    mSwipeRefreshLayout.setRefreshing(false);
-                }
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
+            binding.activityMainSwipeRefreshLayout.post(() -> {
+                binding.activityMainSwipeRefreshLayout.setRefreshing(false);
             });
         }
     }
@@ -487,8 +447,8 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
         if (adapter.getItemCount() == 0) {
             fetchData(false);
         } else {
-            no_data.setVisibility(View.GONE);
-            viewMoreLaunches.setVisibility(View.VISIBLE);
+            binding.noLaunches.setVisibility(View.GONE);
+            binding.viewMoreLaunches.setVisibility(View.VISIBLE);
         }
         Bundle bundle = getArguments();
         if (bundle != null) {
@@ -556,12 +516,12 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
             if (switchPreferences.getNextFABHidden()) {
                 item.setTitle("Show FAB");
                 if (switchPreferences.getNextFABHidden()) {
-                    fab.setVisibility(View.GONE);
+                    binding.fab.setVisibility(View.GONE);
                 }
             } else {
                 item.setTitle("Hide FAB");
                 if (!switchPreferences.getNextFABHidden()) {
-                    fab.setVisibility(View.VISIBLE);
+                    binding.fab.setVisibility(View.VISIBLE);
                 }
             }
         }
@@ -575,29 +535,19 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
             Analytics.getInstance().sendButtonClicked("Show Launch filters.");
             switchChanged = false;
             filterViewShowing = true;
-            if(fab != null) {
-                fab.setVisibility(View.VISIBLE);
-            }
-            mSwipeRefreshLayout.setEnabled(false);
+            binding.fab.setVisibility(View.VISIBLE);
+            binding.activityMainSwipeRefreshLayout.setEnabled(false);
             fabExtensionAnimator.updateGlyphs(FabExtensionAnimator.newState("Close", ContextCompat.getDrawable(context, R.drawable.ic_close)), true);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                showView();
-            } else {
-                colorReveal.setVisibility(View.VISIBLE);
-            }
+            showView();
         } else {
             Analytics.getInstance().sendButtonClicked("Hide Launch filters.");
             filterViewShowing = false;
             if (switchPreferences.getNextFABHidden()) {
-                fab.setVisibility(View.GONE);
+                binding.fab.setVisibility(View.GONE);
             }
             fabExtensionAnimator.updateGlyphs(FabExtensionAnimator.newState("Filters", ContextCompat.getDrawable(context, R.drawable.ic_notifications_white)), true);
-            mSwipeRefreshLayout.setEnabled(true);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                hideView();
-            } else {
-                colorReveal.setVisibility(View.INVISIBLE);
-            }
+
+            hideView();
             if (switchChanged) {
                 LaunchCardCompactManager launchCardCompactManager = new LaunchCardCompactManager(context);
                 LaunchWordTimerManager launchWordTimerManager = new LaunchWordTimerManager(context);
@@ -626,6 +576,7 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
                 for (int id : listIds) {
                     launchListManager.updateAppWidget(id);
                 }
+                binding.activityMainSwipeRefreshLayout.setEnabled(true);
                 fetchData(true);
             }
         }
@@ -636,200 +587,179 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
         super.onDestroyView();
         Timber.v("onDestroyView");
         callBackListener = null;
-        mSwipeRefreshLayout.setOnRefreshListener(null);
-        unbinder.unbind();
     }
 
-    @OnClick(R.id.nasa_switch)
+
     public void nasa_switch() {
         confirm();
         switchPreferences.setSwitchNasa(!switchPreferences.getSwitchNasa());
         checkAll();
     }
 
-    @OnClick(R.id.spacex_switch)
     public void spacex_switch() {
         confirm();
         switchPreferences.setSwitchSpaceX(!switchPreferences.getSwitchSpaceX());
         checkAll();
     }
 
-    @OnClick(R.id.roscosmos_switch)
     public void roscosmos_switch() {
         confirm();
         switchPreferences.setSwitchRoscosmos(!switchPreferences.getSwitchRoscosmos());
         checkAll();
     }
 
-    @OnClick(R.id.wallops_switch)
     public void wallops_switch() {
         confirm();
         switchPreferences.setSwitchWallops(!switchPreferences.getSwitchWallops());
         checkAll();
     }
 
-    @OnClick(R.id.new_zealand_switch)
     public void new_zealand_switch() {
         confirm();
         switchPreferences.setSwitchNZ(!switchPreferences.getSwitchNZ());
         checkAll();
     }
 
-    @OnClick(R.id.fg_switch)
     public void french_guiana_switch() {
         confirm();
         switchPreferences.setSwitchFG(!switchPreferences.getSwitchFG());
         checkAll();
     }
 
-    @OnClick(R.id.ula_switch)
+
     public void ula_switch() {
         confirm();
         switchPreferences.setSwitchULA(!switchPreferences.getSwitchULA());
         checkAll();
     }
 
-    @OnClick(R.id.arianespace_switch)
+
     public void arianespace_switch() {
         confirm();
         switchPreferences.setSwitchArianespace(!switchPreferences.getSwitchArianespace());
         checkAll();
     }
 
-    @OnClick(R.id.china_switch)
+
     public void china_switch() {
         confirm();
         switchPreferences.setSwitchCASC(!switchPreferences.getSwitchCASC());
         checkAll();
     }
 
-    @OnClick(R.id.india_switch)
+
     public void india_switch() {
         confirm();
         switchPreferences.setSwitchISRO(!switchPreferences.getSwitchISRO());
         checkAll();
     }
 
-    @OnClick(R.id.KSC_switch)
+
     public void KSC_switch() {
         confirm();
         switchPreferences.setSwitchKSC(!switchPreferences.getSwitchKSC());
         checkAll();
     }
 
-    @OnClick(R.id.ples_switch)
+
     public void ples_switch() {
         confirm();
-        switchPreferences.setSwitchRussia(plesSwitch.isChecked());
+        switchPreferences.setSwitchRussia(binding.colorReveal.plesSwitch.isChecked());
         checkAll();
     }
 
-    @OnClick(R.id.van_switch)
+
     public void van_switch() {
         confirm();
         switchPreferences.setSwitchVan(!switchPreferences.getSwitchVan());
         checkAll();
     }
 
-    @OnClick(R.id.bo_switch)
+
     public void bo_switch() {
         confirm();
         switchPreferences.setSwitchBO(!switchPreferences.getSwitchBO());
         checkAll();
     }
 
-    @OnClick(R.id.rl_switch)
+
     public void rl_switch() {
         confirm();
         switchPreferences.setSwitchRL(!switchPreferences.getSwitchRL());
         checkAll();
     }
 
-    @OnClick(R.id.northrop_switch)
+
     public void northrop_switch() {
         confirm();
         switchPreferences.setSwitchNorthrop(!switchPreferences.getSwitchNorthrop());
         checkAll();
     }
 
-    @OnClick(R.id.japan_switch)
+
     public void japan_switch() {
         confirm();
         switchPreferences.setSwitchJapan(!switchPreferences.getSwitchJapan());
         checkAll();
     }
 
-    @OnClick(R.id.kodiak_switch)
+
     public void kodiak_switch() {
         confirm();
         switchPreferences.setSwitchKodiak(!switchPreferences.getSwitchKodiak());
         checkAll();
     }
     
-    @OnClick(R.id.texas_switch)
+
     public void texas_switch() {
         confirm();
         switchPreferences.setSwitchTexas(!switchPreferences.getSwitchTexas());
         checkAll();
     }
 
-    @OnClick(R.id.misc_switch)
+
     public void miscSwitch() {
         confirm();
         switchPreferences.setSwitchOtherLocation(!switchPreferences.getSwitchOtherLocations());
         checkAll();
     }
 
-    @OnClick(R.id.strict_switch)
+
     public void strict_switch() {
         confirm();
         switchPreferences.setSwitchStrictMatching(!switchPreferences.getSwitchStrictMatching());
         setUpSwitches();
     }
 
-    @OnClick(R.id.all_switch)
+
     public void all_switch() {
         confirm();
         switchPreferences.setAllSwitch(!switchPreferences.getAllSwitch());
         setUpSwitches();
     }
 
-    @OnClick(R.id.tbd_launch)
+
     public void noGoSwitch() {
         confirm();
-        switchPreferences.setNoGoSwitch(tbdLaunchSwitch.isChecked());
+        switchPreferences.setNoGoSwitch(binding.colorReveal.tbdLaunch.isChecked());
     }
 
-    @OnClick(R.id.persist_last_launch)
+
     public void setPersistLastSwitch() {
         confirm();
-        switchPreferences.setPersistLastSwitch(persistLastSwitch.isChecked());
+        switchPreferences.setPersistLastSwitch(binding.colorReveal.persistLastLaunch.isChecked());
     }
 
-    @OnClick(R.id.action_notification_settings)
+
     public void onNotificationSettingsClicked() {
         Intent intent = new Intent(context, SettingsActivity.class);
         startActivity(intent);
     }
 
-    @OnClick({R.id.tbd_info, R.id.last_launch_info, R.id.all_info, R.id.other_info})
-    public void onViewClicked(View view) {
+    public void createDialog(int titleRes, int contentRes) {
         MaterialDialog.Builder dialog = new MaterialDialog.Builder(context);
         dialog.positiveText("Ok");
-        switch (view.getId()) {
-            case R.id.tbd_info:
-                dialog.title(R.string.no_go).content(R.string.no_go_description).show();
-                break;
-            case R.id.last_launch_info:
-                dialog.title(R.string.launch_info).content(R.string.launch_info_description).show();
-                break;
-            case R.id.all_info:
-                dialog.title("Follow All Launches").content("This option follows all launches available, some of which do not fit neatly into a category listed above.").show();
-                break;
-            case R.id.other_info:
-                dialog.title(R.string.strict_matching_title).content(R.string.strict_matching).show();
-                break;
-        }
+        dialog.title(titleRes).content(contentRes).show();
     }
 
     private void confirm() {
@@ -843,21 +773,12 @@ public class NextLaunchFragment extends BaseFragment implements SwipeRefreshLayo
     private void checkAll() {
         if (switchPreferences.getAllSwitch()) {
             switchPreferences.setAllSwitch(false);
-            allSwitch.setChecked(false);
+            binding.colorReveal.allSwitch.setChecked(false);
         }
     }
 
-    @OnClick({R.id.view_more_launches, R.id.view_more_launches2})
     public void onViewClicked() {
         callBackListener.onNavigateToLaunches();
-    }
-
-    public void showFilters() {
-        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) {
-            if (!isFilterShown()) {
-                showView();
-            }
-        }
     }
 
     public interface CallBackListener {

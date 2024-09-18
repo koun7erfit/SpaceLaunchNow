@@ -1,12 +1,13 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'realm-android'
-apply plugin: 'com.jakewharton.butterknife'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
+    buildFeatures {
+        viewBinding true
+    }
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
@@ -36,7 +37,6 @@ android {
             buildConfigField("long", "VERSION_CODE", "${defaultConfig.versionCode}")
             buildConfigField("String","VERSION_NAME","\"${defaultConfig.versionName}\"")
 
-            //..
         }
         release {
             buildConfigField("long", "VERSION_CODE", "${defaultConfig.versionCode}")
@@ -100,11 +100,7 @@ dependencies {
     kapt deps.glideCompiler
     implementation deps.glideTransformation
     implementation deps.timber
-    implementation deps.butterknife
-    kapt deps.butterknifeCompiler
     implementation deps.materialValue
-    implementation deps.autoValue
-    annotationProcessor deps.autoValueProcessor
     implementation deps.statefulLayout
     //Twitter
     implementation deps.twitterCore

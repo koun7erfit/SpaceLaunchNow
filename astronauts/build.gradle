@@ -1,7 +1,9 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.jakewharton.butterknife'
 
 android {
+    buildFeatures {
+        viewBinding true
+    }
     compileSdkVersion rootProject.ext.compileSdkVersion
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion
@@ -16,6 +18,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
@@ -29,10 +32,12 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(':data')
     implementation project(':common')
+
     //Networking
     implementation deps.retrofit
     implementation deps.converter_gson
     implementation deps.gson
+
     //Utils
     implementation deps.timber
     implementation deps.constraintLayout
@@ -50,10 +55,9 @@ dependencies {
     implementation deps.communityMaterialTypeface
     implementation deps.weathericon
     implementation deps.fontawesomeTypeface
+
     //Views
     implementation deps.statefulLayout
-    implementation deps.butterknife
-    annotationProcessor deps.butterknifeCompiler
     implementation deps.glide
     annotationProcessor deps.glideCompiler
     implementation deps.playAds

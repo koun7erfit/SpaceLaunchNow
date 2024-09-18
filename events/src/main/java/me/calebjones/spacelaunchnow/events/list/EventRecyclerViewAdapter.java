@@ -6,24 +6,17 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.appcompat.widget.AppCompatButton;
-import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.recyclerview.widget.RecyclerView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+
 import me.calebjones.spacelaunchnow.common.GlideApp;
 import me.calebjones.spacelaunchnow.common.utils.Utils;
 import me.calebjones.spacelaunchnow.data.models.main.Event;
 import me.calebjones.spacelaunchnow.events.R;
-import me.calebjones.spacelaunchnow.events.R2;
+import me.calebjones.spacelaunchnow.events.databinding.EventItemBinding;
 import me.calebjones.spacelaunchnow.events.detail.EventDetailsActivity;
 
 
@@ -32,6 +25,7 @@ public class EventRecyclerViewAdapter extends RecyclerView.Adapter<EventRecycler
 
     private List<Event> events;
     private Context context;
+    private EventItemBinding binding;
 
     public EventRecyclerViewAdapter(Context context) {
         events = new ArrayList<>();
@@ -50,29 +44,44 @@ public class EventRecyclerViewAdapter extends RecyclerView.Adapter<EventRecycler
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.event_item, parent, false);
-        return new ViewHolder(view);
+        binding = EventItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        View view = binding.getRoot();
+        return new ViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = events.get(position);
-        holder.eventTitle.setText(holder.mItem.getName());
-        holder.eventDate.setText(Utils.getSimpleDateFormatForUIWithPrecision(holder.mItem.getDatePrecision()).format(holder.mItem.getDate()));
-        holder.eventDescription.setText(holder.mItem.getDescription());
-        holder.eventType.setText(holder.mItem.getType().getName());
+        holder.binding.eventTitle.setText(holder.mItem.getName());
+        holder.binding.eventDate.setText(Utils.getSimpleDateFormatForUIWithPrecision(holder.mItem.getDatePrecision()).format(holder.mItem.getDate()));
+        holder.binding.eventDescription.setText(holder.mItem.getDescription());
+        holder.binding.eventType.setText(holder.mItem.getType().getName());
 
         if (holder.mItem.getVideoUrl() != null){
-            holder.watchLive.setVisibility(View.VISIBLE);
+            holder.binding.watchButton.setVisibility(View.VISIBLE);
         } else {
-            holder.watchLive.setVisibility(View.GONE);
+            holder.binding.watchButton.setVisibility(View.GONE);
         }
 
         GlideApp.with(context)
                 .load(holder.mItem.getFeatureImage())
                 .placeholder(R.drawable.placeholder)
-                .into(holder.eventImage);
+                .into(holder.binding.eventImage);
+
+        holder.binding.watchButton.setOnClickListener(view1 -> onWatchClick(holder.mItem));
+        holder.binding.details.setOnClickListener(view2 -> onClick(holder.mItem));
+    }
+
+    void onClick(Event event){
+        Intent intent = new Intent(context, EventDetailsActivity.class);
+        intent.putExtra("eventId", event.getId());
+        context.startActivity(intent);
+    }
+
+    void onWatchClick(Event event){
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(event.getVideoUrl()));
+        context.startActivity(i);
     }
 
     @Override
@@ -81,41 +90,13 @@ public class EventRecyclerViewAdapter extends RecyclerView.Adapter<EventRecycler
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R2.id.event_image)
-        ImageView eventImage;
-        @BindView(R2.id.event_description)
-        TextView eventDescription;
-        @BindView(R2.id.event_title)
-        TextView eventTitle;
-        @BindView(R2.id.event_date)
-        TextView eventDate;
-        @BindView(R2.id.event_type)
-        TextView eventType;
-        @BindView(R2.id.details)
-        AppCompatButton details;
-        @BindView(R2.id.watchButton)
-        AppCompatImageButton watchLive;
+
         public Event mItem;
+        private EventItemBinding binding;
 
-        public ViewHolder(View view) {
-            super(view);
-            ButterKnife.bind(this, view);
-        }
-
-        @OnClick(R2.id.details)
-        void onClick(View v){
-            Event event = events.get(getAdapterPosition());
-            Intent intent = new Intent(context, EventDetailsActivity.class);
-            intent.putExtra("eventId", event.getId());
-            context.startActivity(intent);
-        }
-
-        @OnClick(R2.id.watchButton)
-        void onWawtchClick(View v){
-            Event event = events.get(getAdapterPosition());
-            Intent i = new Intent(Intent.ACTION_VIEW);
-            i.setData(Uri.parse(event.getVideoUrl()));
-            context.startActivity(i);
+        public ViewHolder(EventItemBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
         }
     }
 }

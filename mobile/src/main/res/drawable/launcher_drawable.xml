@@ -1,4 +1,5 @@
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+<layer-list
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:opacity="opaque">
     <!-- The background color, preferably the same as your normal theme -->
     <item android:drawable="@color/primary" />

@@ -6,30 +6,15 @@ import android.app.Activity;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import androidx.cardview.widget.CardView;
-
-import org.w3c.dom.Text;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import butterknife.Unbinder;
 import me.calebjones.spacelaunchnow.common.R;
-import me.calebjones.spacelaunchnow.common.R2;
 import me.calebjones.spacelaunchnow.common.base.BaseFragment;
-import me.calebjones.spacelaunchnow.common.utils.Utils;
-import me.calebjones.spacelaunchnow.common.prefs.ListPreferences;
+import me.calebjones.spacelaunchnow.common.databinding.DetailLaunchAgencyBinding;
 import me.calebjones.spacelaunchnow.data.models.main.Agency;
 import me.calebjones.spacelaunchnow.data.models.main.Launch;
 import me.calebjones.spacelaunchnow.common.ui.launchdetail.DetailsViewModel;
@@ -39,95 +24,31 @@ import timber.log.Timber;
 
 public class AgencyDetailFragment extends BaseFragment {
 
-    @BindView(R2.id.lsp_logo)
-    ImageView lspLogo;
-    @BindView(R2.id.lsp_name)
-    TextView lspName;
-    @BindView(R2.id.lsp_type)
-    TextView lspType;
-    @BindView(R2.id.lsp_summary)
-    TextView lspSummary;
-    @BindView(R2.id.lsp_infoButton_one)
-    AppCompatButton lspInfoButtonOne;
-    @BindView(R2.id.lsp_wikiButton_one)
-    AppCompatButton lspWikiButtonOne;
-    @BindView(R2.id.lsp_card)
-    CardView lspCard;
-    @BindView(R2.id.lsp_administrator)
-    TextView lspAdministrator;
-    @BindView(R2.id.lsp_founded_year)
-    TextView lspFoundedYear;
-    @BindView(R2.id.lsp_agency)
-    AppCompatButton lspAgency;
-
-    @BindView(R2.id.launch_total_value)
-    TextView launchTotal;
-    @BindView(R2.id.consecutive_success_value)
-    TextView consecutiveTotal;
-    @BindView(R2.id.launch_success_value)
-    TextView successTotal;
-    @BindView(R2.id.launch_failure_value)
-    TextView failureTotal;
-
-    @BindView(R2.id.landing_total_value)
-    TextView landingTotal;
-    @BindView(R2.id.consecutive_landing_success_value)
-    TextView consecutiveLandingTotal;
-    @BindView(R2.id.landing_success_value)
-    TextView landingSuccessTotal;
-    @BindView(R2.id.landing_failure_value)
-    TextView landingFailureTotal;
-
-
-
-    private SharedPreferences sharedPref;
-    private static ListPreferences sharedPreference;
     private Context context;
 
     public static Launch detailLaunch;
-    private Unbinder unbinder;
     private DetailsViewModel model;
+    private DetailLaunchAgencyBinding binding;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setScreenName("Agency Detail Fragment");
-        // retain this fragment
         setRetainInstance(true);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view;
-        this.sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        this.context = getContext();
-        setScreenName("LauncherAgency Detail Fragment");
-
-        sharedPreference = ListPreferences.getInstance(this.context);
-
-        view = inflater.inflate(R.layout.detail_launch_agency, container, false);
-
-        unbinder = ButterKnife.bind(this, view);
-
-        Timber.v("Creating views...");
-        return view;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        Timber.v("onDestroyView");
-        unbinder.unbind();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
+        binding = DetailLaunchAgencyBinding.inflate(inflater, container, false);
+        binding.lspInfoButtonOne.setOnClickListener(view -> onLspInfoButtonOneClicked());
+        binding.lspWikiButtonOne.setOnClickListener(view -> onLspWikiButtonOneClicked());
+        binding.lspAgency.setOnClickListener(view -> onViewClicked());
+        context = getContext();
+        return binding.getRoot();
     }
 
     public void setLaunch(Launch launch) {
-        Timber.v("Launch update received: %s", launch.getName());
         detailLaunch = launch;
         setUpViews(launch);
     }
@@ -137,104 +58,101 @@ public class AgencyDetailFragment extends BaseFragment {
             detailLaunch = launch;
 
             Timber.v("Setting up views...");
-            lspCard.setVisibility(View.VISIBLE);
+            binding.lspCard.setVisibility(View.VISIBLE);
 
-            lspAgency.setText(String.format(this.getString(R.string.view_rocket_launches), launch.getLaunchServiceProvider().getName()));
+            binding.lspAgency.setText(String.format(this.getString(R.string.view_rocket_launches),
+                    launch.getLaunchServiceProvider().getName()));
             if (detailLaunch.getLaunchServiceProvider().getLogoUrl() != null) {
-                lspLogo.setVisibility(View.VISIBLE);
+                binding.lspLogo.setVisibility(View.VISIBLE);
                 GlideApp.with(context)
                         .load(detailLaunch.getLaunchServiceProvider().getLogoUrl())
                         .centerInside()
-                        .into(lspLogo);
+                        .into(binding.lspLogo);
             } else {
-                lspLogo.setVisibility(View.GONE);
+                binding.lspLogo.setVisibility(View.GONE);
             }
-            lspName.setText(detailLaunch.getLaunchServiceProvider().getName());
-            lspType.setText(detailLaunch.getLaunchServiceProvider().getType());
+            binding.lspName.setText(detailLaunch.getLaunchServiceProvider().getName());
+            binding.lspType.setText(detailLaunch.getLaunchServiceProvider().getType());
             if (detailLaunch.getLaunchServiceProvider().getAdministrator() != null) {
-                lspAdministrator.setText(String.format("%s", detailLaunch.getLaunchServiceProvider().getAdministrator()));
+                binding.lspAdministrator.setText(String.format("%s", detailLaunch.getLaunchServiceProvider().getAdministrator()));
             } else {
-                lspAdministrator.setText(R.string.unknown_administrator);
+                binding.lspAdministrator.setText(R.string.unknown_administrator);
             }
             if (detailLaunch.getLaunchServiceProvider().getFoundingYear() != null) {
-                lspFoundedYear.setText(String.format(getString(R.string.founded_in), detailLaunch.getLaunchServiceProvider().getFoundingYear()));
+                binding.lspFoundedYear.setText(String.format(getString(R.string.founded_in), detailLaunch.getLaunchServiceProvider().getFoundingYear()));
             } else {
-                lspFoundedYear.setText(R.string.unknown_year);
+                binding.lspFoundedYear.setText(R.string.unknown_year);
             }
-            lspSummary.setText(detailLaunch.getLaunchServiceProvider().getDescription());
+            binding.lspSummary.setText(detailLaunch.getLaunchServiceProvider().getDescription());
             if (detailLaunch.getLaunchServiceProvider().getInfoUrl() == null) {
-                lspInfoButtonOne.setVisibility(View.GONE);
+                binding.lspInfoButtonOne.setVisibility(View.GONE);
             }
 
             if (detailLaunch.getLaunchServiceProvider().getWikiUrl() == null) {
-                lspWikiButtonOne.setVisibility(View.GONE);
+                binding.lspWikiButtonOne.setVisibility(View.GONE);
             }
-            lspAgency.setVisibility(View.VISIBLE);
+            binding.lspAgency.setVisibility(View.VISIBLE);
 
             if (detailLaunch.getLaunchServiceProvider() != null) {
                 Agency agency = detailLaunch.getLaunchServiceProvider();
 
                 if (agency.getTotalLaunchCount() != null) {
-                    launchTotal.setText(String.valueOf(agency.getTotalLaunchCount()));
+                    binding.launchTotalValue.setText(String.valueOf(agency.getTotalLaunchCount()));
                 } else {
-                    launchTotal.setText(" - ");
+                    binding.launchTotalValue.setText(" - ");
                 }
 
                 if (agency.getSuccessfulLaunches() != null) {
-                    successTotal.setText(String.valueOf(agency.getSuccessfulLaunches()));
+                    binding.launchSuccessValue.setText(String.valueOf(agency.getSuccessfulLaunches()));
                 } else {
-                    successTotal.setText(" - ");
+                    binding.launchSuccessValue.setText(" - ");
                 }
 
                 if (agency.getConsecutiveSuccessfulLaunches() != null) {
-                    consecutiveTotal.setText(String.valueOf(agency.getConsecutiveSuccessfulLaunches()));
+                    binding.consecutiveSuccessValue.setText(String.valueOf(agency.getConsecutiveSuccessfulLaunches()));
                 } else {
-                    consecutiveTotal.setText(" - ");
+                    binding.consecutiveSuccessValue.setText(" - ");
                 }
 
                 if (agency.getFailedLaunches() != null) {
-                    failureTotal.setText(String.valueOf(agency.getFailedLaunches()));
+                    binding.launchFailureValue.setText(String.valueOf(agency.getFailedLaunches()));
                 } else {
-                    failureTotal.setText(" - ");
+                    binding.launchFailureValue.setText(" - ");
                 }
 
                 if (agency.getAttemptedLandings() != null) {
-                    landingTotal.setText(String.valueOf(agency.getAttemptedLandings()));
+                    binding.landingTotalValue.setText(String.valueOf(agency.getAttemptedLandings()));
                 } else {
-                    launchTotal.setText(" - ");
+                    binding.landingTotalValue.setText(" - ");
                 }
 
                 if (agency.getSuccessfulLandings() != null) {
-                    landingSuccessTotal.setText(String.valueOf(agency.getSuccessfulLandings()));
+                    binding.landingSuccessValue.setText(String.valueOf(agency.getSuccessfulLandings()));
                 } else {
-                    landingSuccessTotal.setText(" - ");
+                    binding.landingSuccessValue.setText(" - ");
                 }
 
                 if (agency.getConsecutiveSuccessfulLandings() != null) {
-                    consecutiveLandingTotal.setText(String.valueOf(agency.getConsecutiveSuccessfulLandings()));
+                    binding.consecutiveLandingSuccessValue.setText(String.valueOf(agency.getConsecutiveSuccessfulLandings()));
                 } else {
-                    consecutiveLandingTotal.setText(" - ");
+                    binding.consecutiveLandingSuccessValue.setText(" - ");
                 }
 
                 if (agency.getFailedLandings() != null) {
-                    landingFailureTotal.setText(String.valueOf(agency.getFailedLandings()));
+                    binding.landingFailureValue.setText(String.valueOf(agency.getFailedLandings()));
                 } else {
-                    landingFailureTotal.setText(" - ");
+                    binding.landingFailureValue.setText(" - ");
                 }
-
             }
-
         } catch (NullPointerException e) {
             Timber.e(e);
         }
     }
 
-
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         model = ViewModelProviders.of(getActivity()).get(DetailsViewModel.class);
-        // update UI
         model.getLaunch().observe(this, this::setLaunch);
     }
 
@@ -242,24 +160,19 @@ public class AgencyDetailFragment extends BaseFragment {
         return new AgencyDetailFragment();
     }
 
-    @OnClick(R2.id.lsp_infoButton_one)
     public void onLspInfoButtonOneClicked() {
         Activity activity = (Activity) context;
         openCustomTab(activity, context, detailLaunch.getLaunchServiceProvider().getInfoUrl());
     }
 
-    @OnClick(R2.id.lsp_wikiButton_one)
     public void onLspWikiButtonOneClicked() {
         Activity activity = (Activity) context;
         openCustomTab(activity, context, detailLaunch.getLaunchServiceProvider().getWikiUrl());
     }
 
-    @OnClick(R2.id.lsp_agency)
     public void onViewClicked() {
         Intent intent = new Intent(context, AgencyLaunchActivity.class);
         intent.putExtra("lspName", detailLaunch.getLaunchServiceProvider().getName());
         startActivity(intent);
     }
-
-
 }

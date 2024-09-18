@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <include layout="@layout/starship_dashboard_launch_card" />
+        <include android:id="@+id/starship_dashboard_launch_card" layout="@layout/starship_dashboard_launch_card" />
 
     </cz.kinst.jakub.view.SimpleStatefulLayout>
 

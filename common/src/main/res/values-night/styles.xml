@@ -11,7 +11,7 @@
         <item name="spinnerStyle">@style/MySpinner</item>
     </style>
 
-    <style name="BaseAppTheme" parent="Theme.MaterialComponents">
+    <style name="BaseAppTheme" parent="Theme.Material3.Dark">
         <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>
 
         <!-- Customize your theme here. -->

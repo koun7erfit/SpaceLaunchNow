@@ -13,12 +13,10 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.PlayerConstants;
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayer;
-import com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayerView;
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.listeners.AbstractYouTubePlayerListener;
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.listeners.YouTubePlayerListener;
 
@@ -27,21 +25,15 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatButton;
-import androidx.core.widget.NestedScrollView;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import io.reactivex.disposables.Disposable;
 import io.realm.RealmResults;
 import me.calebjones.spacelaunchnow.common.R;
-import me.calebjones.spacelaunchnow.common.R2;
 import me.calebjones.spacelaunchnow.common.base.BaseFragment;
+import me.calebjones.spacelaunchnow.common.databinding.DetailLaunchSummaryBinding;
 import me.calebjones.spacelaunchnow.common.prefs.ListPreferences;
 import me.calebjones.spacelaunchnow.common.ui.adapters.NewsListAdapter;
 import me.calebjones.spacelaunchnow.common.ui.adapters.UpdateAdapter;
@@ -57,8 +49,6 @@ import me.calebjones.spacelaunchnow.data.models.main.Launch;
 import me.calebjones.spacelaunchnow.data.models.main.VidURL;
 import me.calebjones.spacelaunchnow.data.models.main.news.NewsItem;
 
-import me.calebjones.spacelaunchnow.common.ui.views.custom.CountDownView;
-import me.calebjones.spacelaunchnow.common.ui.views.custom.WeatherCard;
 import me.calebjones.spacelaunchnow.data.networking.news.data.Callbacks;
 import me.calebjones.spacelaunchnow.data.networking.news.data.NewsDataRepository;
 import retrofit2.Call;
@@ -68,34 +58,6 @@ import timber.log.Timber;
 
 public class SummaryDetailFragment extends BaseFragment implements YouTubePlayerListener {
 
-    @BindView(R2.id.countdown_status)
-    TextView countdownStatus;
-    @BindView(R2.id.countdown_layout)
-    CountDownView countDownView;
-    @BindView(R2.id.launch_summary)
-    NestedScrollView launchSummary;
-    @BindView(R2.id.date)
-    TextView launchDate;
-    @BindView(R2.id.watchButton)
-    AppCompatButton watchButton;
-    @BindView(R2.id.launch_window_text)
-    TextView launchWindowText;
-    @BindView(R2.id.error_message)
-    TextView errorMessage;
-    @BindView(R2.id.weather_card)
-    WeatherCard weatherCard;
-    @BindView(R2.id.videos_empty)
-    TextView videosEmpty;
-    @BindView(R2.id.news_recycler_view)
-    RecyclerView recyclerView;
-    @BindView(R2.id.youtube_view)
-    YouTubePlayerView youTubePlayerView;
-    @BindView(R2.id.related_card)
-    View relatedCard;
-    @BindView(R2.id.update_card)
-    View updateCard;
-    @BindView(R2.id.update_recycler_view)
-    RecyclerView updateRecyclerView;
 
     private SharedPreferences sharedPref;
     private ListPreferences sharedPreference;
@@ -109,13 +71,13 @@ public class SummaryDetailFragment extends BaseFragment implements YouTubePlayer
     private int youTubeProgress = 0;
     public Disposable var;
     private boolean future = true;
-    private Unbinder unbinder;
     private DetailsViewModel model;
     private YouTubePlayer youTubePlayer;
     private NewsDataRepository dataRepository;
     private NewsListAdapter listAdapter;
     boolean isYouTubePlaying = false;
     private UpdateAdapter updateAdapter;
+    private DetailLaunchSummaryBinding binding;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -127,6 +89,9 @@ public class SummaryDetailFragment extends BaseFragment implements YouTubePlayer
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        binding = DetailLaunchSummaryBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
+
         this.sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         this.context = getContext();
 
@@ -137,9 +102,6 @@ public class SummaryDetailFragment extends BaseFragment implements YouTubePlayer
             nightMode = false;
         }
 
-        View view = inflater.inflate(R.layout.detail_launch_summary, container, false);
-
-        unbinder = ButterKnife.bind(this, view);
         dataRepository = new NewsDataRepository(getContext(), getRealm());
 
         if (savedInstanceState != null) {
@@ -186,8 +148,8 @@ public class SummaryDetailFragment extends BaseFragment implements YouTubePlayer
 
     private void setUpViews(Launch launch) {
         try {
-            getLifecycle().addObserver(youTubePlayerView);
-            videosEmpty.setVisibility(View.GONE);
+            getLifecycle().addObserver(binding.youtubeView);
+            binding.videosEmpty.setVisibility(View.GONE);
             detailLaunch = launch;
 
             fetchRelatedNews(launch.getId());
@@ -197,7 +159,7 @@ public class SummaryDetailFragment extends BaseFragment implements YouTubePlayer
             Date mDate;
             String dateText;
 
-            if (detailLaunch.getVidURLs() != null && detailLaunch.getVidURLs().size() > 0) {
+            if (detailLaunch.getVidURLs() != null && !detailLaunch.getVidURLs().isEmpty()) {
 
                 for (VidURL url : detailLaunch.getVidURLs()) {
                     youTubeURL = Utils.getYouTubeID(url.getUrl());
@@ -206,11 +168,11 @@ public class SummaryDetailFragment extends BaseFragment implements YouTubePlayer
 
                 if (youTubeURL != null) {
                     Timber.v("Loading %s", youTubeURL);
-                    youTubePlayerView.setVisibility(View.VISIBLE);
-                    errorMessage.setVisibility(View.GONE);
+                    binding.youtubeView.setVisibility(View.VISIBLE);
+                    binding.errorMessage.setVisibility(View.GONE);
 //                    youTubePlayerView.getPlayerUIController().enableLiveVideoUI(true);
-                    youTubePlayerView.getPlayerUIController().showFullscreenButton(false);
-                    youTubePlayerView.initialize(youTubePlayer -> {
+                    binding.youtubeView.getPlayerUIController().showFullscreenButton(false);
+                    binding.youtubeView.initialize(youTubePlayer -> {
                         youTubePlayer.addListener(new AbstractYouTubePlayerListener() {
                             @Override
                             public void onReady() {
@@ -220,10 +182,10 @@ public class SummaryDetailFragment extends BaseFragment implements YouTubePlayer
                     }, true);
                 }
 
-                watchButton.setVisibility(View.VISIBLE);
-                watchButton.setOnClickListener(v -> {
+                binding.watchButton.setVisibility(View.VISIBLE);
+                binding.watchButton.setOnClickListener(v -> {
                     Timber.d("Watch: %s", detailLaunch.getVidURLs().size());
-                    if (detailLaunch.getVidURLs().size() > 0) {
+                    if (!detailLaunch.getVidURLs().isEmpty()) {
                         final DialogAdapter adapter = new DialogAdapter((index, item, longClick) -> {
                             if (longClick) {
                                 Intent sendIntent = new Intent();
@@ -267,21 +229,21 @@ public class SummaryDetailFragment extends BaseFragment implements YouTubePlayer
 
             } else {
                 if (future) {
-                    videosEmpty.setVisibility(View.VISIBLE);
+                    binding.videosEmpty.setVisibility(View.VISIBLE);
                 }
-                watchButton.setVisibility(View.GONE);
-                errorMessage.setText(getString(R.string.video_source_unavailable));
-                errorMessage.setVisibility(View.VISIBLE);
+                binding.watchButton.setVisibility(View.GONE);
+                binding.errorMessage.setText(getString(R.string.video_source_unavailable));
+                binding.errorMessage.setVisibility(View.VISIBLE);
             }
 
             if (detailLaunch.getUpdates() != null && detailLaunch.getUpdates().size() > 0){
                 updateAdapter = new UpdateAdapter(context);
-                updateRecyclerView.setLayoutManager(new LinearLayoutManager(context));
-                updateRecyclerView.setAdapter(updateAdapter);
+                binding.updateRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+                binding.updateRecyclerView.setAdapter(updateAdapter);
                 updateAdapter.addItems(detailLaunch.getUpdates());
-                updateCard.setVisibility(View.VISIBLE);
+                binding.updateCard.setVisibility(View.VISIBLE);
             } else {
-                updateCard.setVisibility(View.GONE);
+                binding.updateCard.setVisibility(View.GONE);
             }
 
             Date date = detailLaunch.getNet();
@@ -289,13 +251,13 @@ public class SummaryDetailFragment extends BaseFragment implements YouTubePlayer
             //Get launch date
 //            dateText = Utils.getStatusBasedDateFormat(launch.getNet(), launch.getStatus());
             dateText = Utils.getSimpleDateFormatForUIWithPrecision(launch.getNetPrecision()).format(launch.getNet());
-            launchDate.setText(Html.fromHtml(String.format(getString(R.string.launch_date), dateText)));
+            binding.date.setText(Html.fromHtml(String.format(getString(R.string.launch_date), dateText)));
 
 
-            if (detailLaunch.getWindowStart() != null && detailLaunch.getWindowStart() != null && launch.getStatus().getId() != 2) {
+            if (detailLaunch.getWindowStart() != null && launch.getStatus().getId() != 2) {
                 setWindowStamp();
             } else {
-                launchWindowText.setVisibility(View.GONE);
+                binding.launchWindowText.setVisibility(View.GONE);
             }
 
         } catch (NullPointerException e) {
@@ -309,12 +271,12 @@ public class SummaryDetailFragment extends BaseFragment implements YouTubePlayer
             public void onNewsLoaded(RealmResults<NewsItem> news) {
                 if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.CREATED)) {
                     Timber.v(news.toString());
-                    if (news.size() > 0) {
+                    if (!news.isEmpty()) {
                         listAdapter = new NewsListAdapter(context);
-                        recyclerView.setLayoutManager(new LinearLayoutManager(context));
-                        recyclerView.setAdapter(listAdapter);
+                        binding.newsRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+                        binding.newsRecyclerView.setAdapter(listAdapter);
                         listAdapter.addItems(news);
-                        relatedCard.setVisibility(View.VISIBLE);
+                        binding.relatedCard.setVisibility(View.VISIBLE);
                     }
                 }
             }
@@ -352,7 +314,7 @@ public class SummaryDetailFragment extends BaseFragment implements YouTubePlayer
     private void setupCountdownTimer(Launch launch) {
         //If timestamp is available calculate TMinus and launchDate.
         if (launch.getNet() != null) {
-            countDownView.setLaunch(launch);
+            binding.countdownLayout.setLaunch(launch);
         }
     }
 
@@ -388,19 +350,19 @@ public class SummaryDetailFragment extends BaseFragment implements YouTubePlayer
 
             TimeZone timeZone = dateFormat.getTimeZone();
 
-            launchWindowText.setText(Html.fromHtml(String.format(getString(R.string.instantaneous_launch_window),
+            binding.launchWindowText.setText(Html.fromHtml(String.format(getString(R.string.instantaneous_launch_window),
                     dateFormat.format(windowStart))));
         } else if (windowStart.after(windowEnd)) {
             // Launch data is not trustworthy - start is after end.
 
             TimeZone timeZone = dateFormat.getTimeZone();
 
-            launchWindowText.setText(dateFormat.format(windowStart));
+            binding.launchWindowText.setText(dateFormat.format(windowStart));
         } else if (windowStart.before(windowEnd)) {
             // Launch Window is properly configured
 
             String difference = Utils.printDifference(windowStart, windowEnd);
-            launchWindowText.setText(Html.fromHtml(String.format(getString(R.string.launch_window_extras),
+            binding.launchWindowText.setText(Html.fromHtml(String.format(getString(R.string.launch_window_extras),
                     dateFormat.format(windowStart),
                     dateFormat.format(windowEnd),
                     difference)));
@@ -425,7 +387,6 @@ public class SummaryDetailFragment extends BaseFragment implements YouTubePlayer
         if (timer != null) {
             timer.cancel();
         }
-        unbinder.unbind();
     }
     @Override
     public void onReady() {
@@ -480,7 +441,7 @@ public class SummaryDetailFragment extends BaseFragment implements YouTubePlayer
     public void onVideoId(@NonNull String videoId) {
         YouTubeAPIHelper youTubeAPIHelper = new YouTubeAPIHelper(context,
                 context.getResources().getString(R.string.GoogleMapsKey));
-        youTubePlayerView.getPlayerUIController().enableLiveVideoUI(false);
+        binding.youtubeView.getPlayerUIController().enableLiveVideoUI(false);
         youTubeAPIHelper.getVideoById(videoId, new retrofit2.Callback<VideoResponse>() {
             @Override
             public void onResponse(Call<VideoResponse> call, Response<VideoResponse> response) {
@@ -489,7 +450,7 @@ public class SummaryDetailFragment extends BaseFragment implements YouTubePlayer
                     if (videos.size() > 0) {
                         try {
                             if (videos.get(0).getSnippet().getLiveBroadcastContent().contains("live")){
-                                youTubePlayerView.getPlayerUIController().enableLiveVideoUI(true);
+                                binding.youtubeView.getPlayerUIController().enableLiveVideoUI(true);
                             }
                         } catch (Exception e) {
                             Timber.e(e);

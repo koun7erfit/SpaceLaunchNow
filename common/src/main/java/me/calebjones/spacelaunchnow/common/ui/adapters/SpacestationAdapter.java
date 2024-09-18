@@ -5,26 +5,18 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.bumptech.glide.ListPreloader;
+
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.util.ViewPreloadSizeProvider;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.RecyclerView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import io.realm.RealmList;
-import jp.wasabeef.glide.transformations.ColorFilterTransformation;
 import me.calebjones.spacelaunchnow.common.GlideApp;
 import me.calebjones.spacelaunchnow.common.R;
-import me.calebjones.spacelaunchnow.common.R2;
+import me.calebjones.spacelaunchnow.common.databinding.SpacestationListItemBinding;
 import me.calebjones.spacelaunchnow.data.models.main.spacestation.Spacestation;
 import timber.log.Timber;
 
@@ -35,6 +27,7 @@ public class SpacestationAdapter extends RecyclerView.Adapter<SpacestationAdapte
     public int position;
     private RealmList<Spacestation> spacestations;
     private Context mContext;
+    private SpacestationListItemBinding binding;
 
     public SpacestationAdapter(Context context) {
         spacestations = new RealmList<>();
@@ -60,8 +53,9 @@ public class SpacestationAdapter extends RecyclerView.Adapter<SpacestationAdapte
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         Timber.v("onCreate ViewHolder.");
-        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.spacestation_list_item, viewGroup, false);
-        return new ViewHolder(v);
+        binding = SpacestationListItemBinding.inflate(LayoutInflater.from(viewGroup.getContext()), viewGroup, false);
+
+        return new ViewHolder(binding);
     }
 
     @Override
@@ -73,18 +67,18 @@ public class SpacestationAdapter extends RecyclerView.Adapter<SpacestationAdapte
                     .load(item.getImageUrl())
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .circleCrop()
-                    .into(holder.spacestationIcon);
+                    .into(holder.binding.spacestationIcon);
         } else {
             GlideApp.with(mContext)
                     .load(R.drawable.ic_satellite)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .circleCrop()
-                    .into(holder.spacestationIcon);
+                    .into(holder.binding.spacestationIcon);
         }
 
-        holder.spacestationName.setText(item.getName());
-        holder.spacestationLocation.setText(item.getOrbit());
-        holder.spacestationStatus.setText(item.getStatus().getName());
+        holder.binding.spacestationName.setText(item.getName());
+        holder.binding.spacestationLocation.setText(item.getOrbit());
+        holder.binding.spacestationStatus.setText(item.getStatus().getName());
     }
 
     @Override
@@ -93,22 +87,13 @@ public class SpacestationAdapter extends RecyclerView.Adapter<SpacestationAdapte
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        @BindView(R2.id.spacestation_icon)
-        ImageView spacestationIcon;
-        @BindView(R2.id.spacestation_name)
-        TextView spacestationName;
-        @BindView(R2.id.spacestation_status)
-        TextView spacestationStatus;
-        @BindView(R2.id.spacestation_location)
-        TextView spacestationLocation;
-        @BindView(R2.id.rootview)
-        ConstraintLayout rootview;
+        private SpacestationListItemBinding binding;
 
         //Add content to the card
-        public ViewHolder(View view) {
-            super(view);
-            ButterKnife.bind(this, view);
-            rootview.setOnClickListener(this);
+        public ViewHolder(SpacestationListItemBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+            binding.getRoot().setOnClickListener(this);
         }
 
         //React to click events.

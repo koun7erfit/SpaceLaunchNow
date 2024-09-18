@@ -11,28 +11,20 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.google.android.material.button.MaterialButton;
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayer;
-import com.pierfrancescosoffritti.androidyoutubeplayer.player.YouTubePlayerView;
 import com.pierfrancescosoffritti.androidyoutubeplayer.player.listeners.AbstractYouTubePlayerListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-import cz.kinst.jakub.view.SimpleStatefulLayout;
+
 import me.calebjones.spacelaunchnow.common.base.BaseFragment;
 import me.calebjones.spacelaunchnow.common.prefs.ThemeHelper;
 import me.calebjones.spacelaunchnow.common.ui.views.DialogAdapter;
@@ -47,44 +39,17 @@ import me.calebjones.spacelaunchnow.starship.StarshipDashboardViewModel;
 import me.calebjones.spacelaunchnow.starship.data.StarshipDataRepository;
 import me.calebjones.spacelaunchnow.starship.ui.upcoming.CombinedAdapter;
 import me.spacelaunchnow.starship.R;
-import me.spacelaunchnow.starship.R2;
+import me.spacelaunchnow.starship.databinding.FragmentStarshipDashboardBinding;
+import me.spacelaunchnow.starship.databinding.StarshipDashboardBinding;
 
 /**
  * A fragment representing the Starship Dashboard
  */
 public class StarshipDashboardFragment extends BaseFragment {
 
-    @BindView(R2.id.youtube_view)
-    YouTubePlayerView youtubeView;
-    @BindView(R2.id.starship_dashboard_coordinator)
-    CoordinatorLayout starshipDashboardCoordinator;
-    @BindView(R2.id.upnext_recyclerview)
-    RecyclerView upnextRecyclerview;
-    @BindView(R2.id.roadclosure_recyclerview)
-    RecyclerView roadclosureRecyclerview;
-    @BindView(R2.id.notices_recyclerview)
-    RecyclerView noticeRecyclerview;
-    @BindView(R2.id.update_recyclerview)
-    RecyclerView updateRecyclerview;
-    @BindView(R2.id.live_streams_button)
-    MaterialButton liveStreamsButton;
-    @BindView(R2.id.title)
-    TextView title;
-    @BindView(R2.id.description)
-    TextView description;
-    @BindView(R2.id.roadclosure_stateful_layout)
-    SimpleStatefulLayout roadclosureStatefulLayout;
-    @BindView(R2.id.notices_stateful_layout)
-    SimpleStatefulLayout noticesStatefulLayout;
-    @BindView(R2.id.upnext_stateful_layout)
-    SimpleStatefulLayout upnextStatefulLayout;
-    @BindView(R2.id.update_stateful_layout)
-    SimpleStatefulLayout updateStatefulLayout;
-
 
     private StarshipDataRepository dataRepository;
     private boolean firstLaunch = true;
-    private Unbinder unbinder;
     private StarshipDashboardViewModel model;
     private YouTubePlayer youTubePlayer;
     private RoadClosureAdapter roadClosureAdapter;
@@ -93,6 +58,8 @@ public class StarshipDashboardFragment extends BaseFragment {
     private Dialog dialog;
     private String youTubeURL;
     private CombinedAdapter adapter;
+    private FragmentStarshipDashboardBinding binding;
+    private StarshipDashboardBinding dashboardBinding;
 
 
     /**
@@ -117,30 +84,33 @@ public class StarshipDashboardFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_starship_dashboard, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        binding = FragmentStarshipDashboardBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
+        dashboardBinding = binding.starshipDashboard;
+
         setHasOptionsMenu(true);
-        getLifecycle().addObserver(youtubeView);
+        getLifecycle().addObserver(dashboardBinding.starshipDashboardLivestreamCard.youtubeView);
         model = ViewModelProviders.of(getParentFragment()).get(StarshipDashboardViewModel.class);
         model.getStarshipDashboard().observe(this, this::updateViews);
 
+
         roadClosureAdapter = new RoadClosureAdapter(getContext());
-        roadclosureRecyclerview.setLayoutManager(new LinearLayoutManager(getContext()));
-        roadclosureRecyclerview.addItemDecoration(new SimpleDividerItemDecoration(getContext()));
-        roadclosureRecyclerview.setAdapter(roadClosureAdapter);
+        dashboardBinding.starshipDashboardRoadclosureCard.roadclosureRecyclerview.setLayoutManager(new LinearLayoutManager(getContext()));
+        dashboardBinding.starshipDashboardRoadclosureCard.roadclosureRecyclerview.addItemDecoration(new SimpleDividerItemDecoration(getContext()));
+        dashboardBinding.starshipDashboardRoadclosureCard.roadclosureRecyclerview.setAdapter(roadClosureAdapter);
 
         noticesAdapter = new NoticesAdapter(getContext());
-        noticeRecyclerview.setLayoutManager(new LinearLayoutManager(getContext()));
-        noticeRecyclerview.addItemDecoration(new SimpleDividerItemDecoration(getContext()));
-        noticeRecyclerview.setAdapter(noticesAdapter);
+        dashboardBinding.starshipDashboardNoticesCard.noticesRecyclerview.setLayoutManager(new LinearLayoutManager(getContext()));
+        dashboardBinding.starshipDashboardNoticesCard.noticesRecyclerview.addItemDecoration(new SimpleDividerItemDecoration(getContext()));
+        dashboardBinding.starshipDashboardNoticesCard.noticesRecyclerview.setAdapter(noticesAdapter);
 
         adapter = new CombinedAdapter(getContext(), ThemeHelper.isDarkMode(getActivity()));
-        upnextRecyclerview.setLayoutManager(new LinearLayoutManager(getContext()));
-        upnextRecyclerview.setAdapter(adapter);
+        dashboardBinding.starshipDashboardUpnext.upnextRecyclerview.setLayoutManager(new LinearLayoutManager(getContext()));
+        dashboardBinding.starshipDashboardUpnext.upnextRecyclerview.setAdapter(adapter);
 
         updateAdapter = new UpdateAdapter(getContext());
-        updateRecyclerview.setLayoutManager(new LinearLayoutManager(getContext()));
-        updateRecyclerview.setAdapter(updateAdapter);
+        dashboardBinding.starshipDashboardUpnext.updateRecyclerview.setLayoutManager(new LinearLayoutManager(getContext()));
+        dashboardBinding.starshipDashboardUpnext.updateRecyclerview.setAdapter(updateAdapter);
 
 
         if (savedInstanceState != null) {
@@ -180,67 +150,70 @@ public class StarshipDashboardFragment extends BaseFragment {
 
 
     private void updateViews(Starship starship) {
-        if (starship.getLiveStreams().size() > 0) {
+        assert binding.starshipDashboard != null;
+
+        if (!starship.getLiveStreams().isEmpty()) {
             VidURL liveStream = starship.liveStreams.get(0);
+            assert liveStream != null;
             youTubeURL = Utils.getYouTubeID(liveStream.getUrl());
-            title.setText(liveStream.getName());
-            description.setText(liveStream.getDescription());
-            youtubeView.initialize(youTubePlayer -> {
+            binding.starshipDashboard.starshipDashboardLivestreamCard.title.setText(liveStream.getName());
+            binding.starshipDashboard.starshipDashboardLivestreamCard.description.setText(liveStream.getDescription());
+            binding.starshipDashboard.starshipDashboardLivestreamCard.youtubeView.initialize(youTubePlayer -> {
                 youTubePlayer.addListener(new AbstractYouTubePlayerListener() {
                     @Override
                     public void onReady() {
                         loadVideo(youTubePlayer, youTubeURL);
-                        youtubeView.getPlayerUIController().enableLiveVideoUI(true);
-                        youtubeView.getPlayerUIController().showFullscreenButton(false);
+                        binding.starshipDashboard.starshipDashboardLivestreamCard.youtubeView.getPlayerUIController().enableLiveVideoUI(true);
+                        binding.starshipDashboard.starshipDashboardLivestreamCard.youtubeView.getPlayerUIController().showFullscreenButton(false);
                     }
                 });
             }, true);
         }
         ArrayList<Object> upcomingCombinedObjects = new ArrayList<>();
-        if (starship.getUpcomingObjects().getEvents().size() > 0) {
+        if (!starship.getUpcomingObjects().getEvents().isEmpty()) {
             upcomingCombinedObjects.addAll(starship.getUpcomingObjects().getEvents());
         }
 
-        if (starship.getUpcomingObjects().getLaunches().size() > 0) {
+        if (!starship.getUpcomingObjects().getLaunches().isEmpty()) {
             upcomingCombinedObjects.addAll(starship.getUpcomingObjects().getLaunches());
         }
 
-        if (upcomingCombinedObjects.size() > 0) {
-            upnextStatefulLayout.showContent();
+        if (!upcomingCombinedObjects.isEmpty()) {
+            binding.starshipDashboard.starshipDashboardUpnext.upnextStatefulLayout.showContent();
             upcomingCombinedObjects = sortMultiClassList(upcomingCombinedObjects);
             Object object = upcomingCombinedObjects.get(0);
             upcomingCombinedObjects = new ArrayList<>();
             upcomingCombinedObjects.add(object);
             adapter.addItems(upcomingCombinedObjects);
         } else {
-            upnextStatefulLayout.showEmpty();
+            binding.starshipDashboard.starshipDashboardUpnext.upnextStatefulLayout.showEmpty();
         }
 
-        if (starship.getRoadClosures().size() > 0) {
-            roadclosureStatefulLayout.showContent();
+        if (!starship.getRoadClosures().isEmpty()) {
+            binding.starshipDashboard.starshipDashboardRoadclosureCard.roadclosureStatefulLayout.showContent();
             roadClosureAdapter.addItems(starship.getRoadClosures());
         } else {
-            roadclosureStatefulLayout.showEmpty();
+            binding.starshipDashboard.starshipDashboardRoadclosureCard.roadclosureStatefulLayout.showEmpty();
         }
 
-        if (starship.getNotices().size() > 0) {
-            noticesStatefulLayout.showContent();
+        if (!starship.getNotices().isEmpty()) {
+            binding.starshipDashboard.starshipDashboardNoticesCard.noticesStatefulLayout.showContent();
             noticesAdapter.addItems(starship.getNotices());
         } else {
-            noticesStatefulLayout.showEmpty();
+            binding.starshipDashboard.starshipDashboardNoticesCard.noticesStatefulLayout.showEmpty();
         }
 
-        if (starship.getUpdates().size() > 0){
-            updateStatefulLayout.showContent();
+        if (!starship.getUpdates().isEmpty()){
+            binding.starshipDashboard.starshipDashboardUpnext.updateStatefulLayout.showContent();
             updateAdapter = new UpdateAdapter(getContext());
-            updateRecyclerview.setAdapter(updateAdapter);
+            binding.starshipDashboard.starshipDashboardUpnext.updateRecyclerview.setAdapter(updateAdapter);
             updateAdapter.addItems(starship.getUpdates());
         } else {
-            updateStatefulLayout.showEmpty();
+            binding.starshipDashboard.starshipDashboardUpnext.updateStatefulLayout.showEmpty();
         }
 
-        liveStreamsButton.setOnClickListener(v -> {
-            if (starship.getLiveStreams().size() > 0) {
+        binding.starshipDashboard.starshipDashboardLivestreamCard.liveStreamsButton.setOnClickListener(v -> {
+            if (!starship.getLiveStreams().isEmpty()) {
                 final DialogAdapter adapter = new DialogAdapter((index, item, longClick) -> {
                     if (longClick) {
                         Intent sendIntent = new Intent();

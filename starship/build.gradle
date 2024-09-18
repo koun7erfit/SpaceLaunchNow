@@ -1,11 +1,12 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.jakewharton.butterknife'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
+    buildFeatures {
+        viewBinding true
+    }
 
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion
@@ -52,7 +53,6 @@ dependencies {
     implementation deps.fontawesomeTypeface
     //Views
     implementation deps.statefulLayout
-    implementation deps.butterknife
     implementation project(path: ':events')
     implementation deps.glide
     annotationProcessor deps.glideCompiler
@@ -68,5 +68,4 @@ dependencies {
     implementation deps.glide
     kapt deps.glideCompiler
     implementation deps.glideTransformation
-    kapt 'com.jakewharton:butterknife-compiler:10.2.1'
 }

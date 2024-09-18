@@ -10,26 +10,19 @@ import android.view.ViewGroup;
 import java.util.List;
 
 import androidx.annotation.Nullable;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-import cz.kinst.jakub.view.SimpleStatefulLayout;
+
 import io.realm.RealmResults;
 
 import me.calebjones.spacelaunchnow.common.base.BaseFragment;
-import me.calebjones.spacelaunchnow.common.utils.EndlessRecyclerViewScrollListener;
-import me.calebjones.spacelaunchnow.common.utils.SimpleDividerItemDecoration;
 import me.calebjones.spacelaunchnow.data.models.main.Event;
-import me.calebjones.spacelaunchnow.events.R;
-import me.calebjones.spacelaunchnow.events.R2;
 import me.calebjones.spacelaunchnow.events.data.Callbacks;
 import me.calebjones.spacelaunchnow.events.data.EventDataRepository;
 
+import me.calebjones.spacelaunchnow.events.databinding.FragmentEventListBinding;
 import timber.log.Timber;
 
 /**
@@ -45,22 +38,12 @@ public class EventListFragment extends BaseFragment implements SwipeRefreshLayou
     private boolean canLoadMore;
     private boolean statefulStateContentShow = false;
     private boolean firstLaunch = true;
-    private Unbinder unbinder;
     private EventRecyclerViewAdapter adapter;
     private LinearLayoutManager linearLayoutManager;
     private List<Integer> statusIDs;
     private Integer[] statusIDsSelection;
     private boolean limitReached;
-
-    @BindView(R2.id.event_recycler_view)
-    RecyclerView recyclerView;
-    @BindView(R2.id.event_stateful_view)
-    SimpleStatefulLayout statefulView;
-    @BindView(R2.id.event_coordinator)
-    CoordinatorLayout coordinatorLayout;
-    @BindView(R2.id.event_refresh_layout)
-    SwipeRefreshLayout swipeRefreshLayout;
-
+    private FragmentEventListBinding binding;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -86,28 +69,28 @@ public class EventListFragment extends BaseFragment implements SwipeRefreshLayou
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_event_list, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        binding = FragmentEventListBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
         setHasOptionsMenu(true);
 
         // Set the adapter
         Context context = view.getContext();
         adapter = new EventRecyclerViewAdapter(context);
         linearLayoutManager = new LinearLayoutManager(context, RecyclerView.VERTICAL, false);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setAdapter(adapter);
+        binding.eventRecyclerView.setLayoutManager(linearLayoutManager);
+        binding.eventRecyclerView.setAdapter(adapter);
         if (firstLaunch) {
-            statefulView.showProgress();
+            binding.eventStatefulView.showProgress();
         } else {
-            statefulView.showContent();
+            binding.eventStatefulView.showContent();
         }
 
         canLoadMore = true;
         limitReached = false;
-        statefulView.setOfflineRetryOnClickListener(v -> onRefresh());
+        binding.eventStatefulView.setOfflineRetryOnClickListener(v -> onRefresh());
         fetchData(false, firstLaunch, false);
         firstLaunch = false;
-        swipeRefreshLayout.setOnRefreshListener(this);
+        binding.eventRefreshLayout.setOnRefreshListener(this);
         return view;
     }
 
@@ -150,7 +133,7 @@ public class EventListFragment extends BaseFragment implements SwipeRefreshLayou
                 @Override
                 public void onError(String message, @Nullable Throwable throwable) {
                     if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-                        statefulView.showOffline();
+                        binding.eventStatefulView.showOffline();
                         statefulStateContentShow = false;
                         if (throwable != null) {
                             Timber.e(throwable);
@@ -165,19 +148,19 @@ public class EventListFragment extends BaseFragment implements SwipeRefreshLayou
 
 
     private void showNetworkLoading(boolean refreshing) {
-        swipeRefreshLayout.setRefreshing(refreshing);
+        binding.eventRefreshLayout.setRefreshing(refreshing);
     }
 
     private void updateAdapter(List<Event> events) {
 
-        if (events.size() > 0) {
+        if (!events.isEmpty()) {
             if (!statefulStateContentShow) {
-                statefulView.showContent();
+                binding.eventStatefulView.showContent();
                 statefulStateContentShow = true;
             }
             adapter.addItems(events);
         } else {
-            statefulView.showEmpty();
+            binding.eventStatefulView.showEmpty();
             statefulStateContentShow = false;
             if (adapter != null) {
                 adapter.clear();
@@ -198,7 +181,7 @@ public class EventListFragment extends BaseFragment implements SwipeRefreshLayou
         if (searchTerm != null || statusIDs != null) {
             statusIDs = null;
             searchTerm = null;
-            swipeRefreshLayout.setRefreshing(false);
+            binding.eventRefreshLayout.setRefreshing(false);
             fetchData(false, false, false);
         } else {
             fetchData(true, false, false);
