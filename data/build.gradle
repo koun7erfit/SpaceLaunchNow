@@ -50,6 +50,5 @@ dependencies {
     implementation deps.adapter_rxjava
     implementation deps.gson
     implementation deps.timber
-    annotationProcessor deps.autoValueProcessor
     implementation deps.once
 }

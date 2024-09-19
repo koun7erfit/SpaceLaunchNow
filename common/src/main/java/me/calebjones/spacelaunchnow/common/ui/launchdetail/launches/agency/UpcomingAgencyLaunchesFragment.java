@@ -1,9 +1,10 @@
 package me.calebjones.spacelaunchnow.common.ui.launchdetail.launches.agency;
 
-
 import android.content.Context;
 import android.os.Bundle;
+
 import androidx.annotation.Nullable;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,18 +12,12 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-import cz.kinst.jakub.view.SimpleStatefulLayout;
-import me.calebjones.spacelaunchnow.common.R;
-import me.calebjones.spacelaunchnow.common.R2;
 import me.calebjones.spacelaunchnow.common.base.BaseFragment;
 import me.calebjones.spacelaunchnow.common.content.data.Callbacks;
+import me.calebjones.spacelaunchnow.common.databinding.FragmentLaunchListBinding;
 import me.calebjones.spacelaunchnow.common.prefs.ThemeHelper;
 import me.calebjones.spacelaunchnow.common.utils.EndlessRecyclerViewScrollListener;
 import me.calebjones.spacelaunchnow.common.utils.SimpleDividerItemDecoration;
@@ -38,12 +33,7 @@ public class UpcomingAgencyLaunchesFragment extends BaseFragment {
     private static final String SEARCH_TERM = "searchTerm";
     private static final String LSP_NAME = "lspName";
 
-    @BindView(R2.id.recycler_view)
-    RecyclerView recyclerView;
-    @BindView(R2.id.stateful_view)
-    SimpleStatefulLayout statefulView;
-    @BindView(R2.id.coordinator)
-    CoordinatorLayout coordinatorLayout;
+
 
     private LinearLayoutManager linearLayoutManager;
     private ListAdapter adapter;
@@ -57,23 +47,13 @@ public class UpcomingAgencyLaunchesFragment extends BaseFragment {
     public boolean canLoadMore;
     private boolean statefulStateContentShow = false;
     private Context context;
-
+    private FragmentLaunchListBinding binding;
     private UpcomingAgencyLaunchesFragment.OnFragmentInteractionListener mListener;
-    private Unbinder unbinder;
 
     public UpcomingAgencyLaunchesFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param searchTerm Parameter 1.
-     * @param lspName    Parameter 2.
-     * @return A new instance of fragment PreviousLauncherLaunchesFragment.
-     */
-    // TODO: Rename and change types and number of parameters
     public static UpcomingAgencyLaunchesFragment newInstance(String searchTerm, String lspName) {
         UpcomingAgencyLaunchesFragment fragment = new UpcomingAgencyLaunchesFragment();
         Bundle args = new Bundle();
@@ -97,16 +77,14 @@ public class UpcomingAgencyLaunchesFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_launch_list, container, false);
-        unbinder = ButterKnife.bind(this, view);
-
+        binding = FragmentLaunchListBinding.inflate(inflater, container, false);
         adapter = new ListAdapter(context, ThemeHelper.isDarkMode(getActivity()));
         linearLayoutManager = new LinearLayoutManager(context, RecyclerView.VERTICAL, false);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.addItemDecoration(new SimpleDividerItemDecoration(context));
-        recyclerView.setAdapter(adapter);
-        statefulView.showProgress();
-        statefulView.setOfflineRetryOnClickListener(v -> fetchData(true));
+        binding.recyclerView.setLayoutManager(linearLayoutManager);
+        binding.recyclerView.addItemDecoration(new SimpleDividerItemDecoration(context));
+        binding.recyclerView.setAdapter(adapter);
+        binding.statefulView.showProgress();
+        binding.statefulView.setOfflineRetryOnClickListener(v -> fetchData(true));
         scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
@@ -118,19 +96,11 @@ public class UpcomingAgencyLaunchesFragment extends BaseFragment {
                 }
             }
         };
-        recyclerView.addOnScrollListener(scrollListener);
+        binding.recyclerView.addOnScrollListener(scrollListener);
         fetchData(true);
         // Inflate the layout for this fragment
-        return view;
+        return binding.getRoot();
     }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        Timber.v("onDestroyView");
-        unbinder.unbind();
-    }
-
 
     @Override
     public void onAttach(Context context) {
@@ -139,11 +109,9 @@ public class UpcomingAgencyLaunchesFragment extends BaseFragment {
             mListener = (UpcomingAgencyLaunchesFragment.OnFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                                       + " must implement OnFragmentInteractionListener");
         }
     }
-
-
 
     public void fetchData(boolean forceRefresh) {
         Timber.v("Sending GET_UP_LAUNCHES");
@@ -151,46 +119,53 @@ public class UpcomingAgencyLaunchesFragment extends BaseFragment {
             nextOffset = 0;
             adapter.clear();
         }
-        upcomingDataRepository.getUpcomingLaunches(nextOffset, searchTerm, lspName, null, null, new Callbacks.ListCallbackMini() {
-            @Override
-            public void onLaunchesLoaded(List<LaunchList> launches, int next, int total) {
-                Timber.v("Offset - %s", next);
-                nextOffset = next;
-                canLoadMore = next > 0;
-                updateAdapter(launches);
-                mListener.setUpcomingBadge(total);
-            }
+        upcomingDataRepository.getUpcomingLaunches(
+                nextOffset,
+                searchTerm,
+                lspName,
+                null,
+                null,
+                new Callbacks.ListCallbackMini() {
+                    @Override
+                    public void onLaunchesLoaded(List<LaunchList> launches, int next, int total) {
+                        Timber.v("Offset - %s", next);
+                        nextOffset = next;
+                        canLoadMore = next > 0;
+                        updateAdapter(launches);
+                        mListener.setUpcomingBadge(total);
+                    }
 
-            @Override
-            public void onNetworkStateChanged(boolean refreshing) {
-                mListener.showUpcomingLoading(refreshing);
-            }
+                    @Override
+                    public void onNetworkStateChanged(boolean refreshing) {
+                        mListener.showUpcomingLoading(refreshing);
+                    }
 
-            @Override
-            public void onError(String message, @Nullable Throwable throwable) {
-                statefulView.showOffline();
-                statefulStateContentShow = false;
-                if (throwable != null) {
-                    Timber.e(throwable);
-                } else {
-                    Timber.e(message);
+                    @Override
+                    public void onError(String message, @Nullable Throwable throwable) {
+                        binding.statefulView.showOffline();
+                        statefulStateContentShow = false;
+                        if (throwable != null) {
+                            Timber.e(throwable);
+                        } else {
+                            Timber.e(message);
+                        }
+                    }
                 }
-            }
-        });
+        );
     }
 
     private void updateAdapter(List<LaunchList> launches) {
 
-        if (launches.size() > 0) {
+        if (!launches.isEmpty()) {
             if (!statefulStateContentShow) {
-                statefulView.showContent();
+                binding.statefulView.showContent();
                 statefulStateContentShow = true;
             }
             adapter.addItems(launches);
             adapter.notifyDataSetChanged();
 
         } else {
-            statefulView.showEmpty();
+            binding.statefulView.showEmpty();
             statefulStateContentShow = false;
             if (adapter != null) {
                 adapter.clear();

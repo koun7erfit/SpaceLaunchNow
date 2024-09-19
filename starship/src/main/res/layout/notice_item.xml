@@ -16,7 +16,7 @@
         android:textAppearance="@style/MaterialTypography.Regular.Subheading"
         android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/watchButton"
+        app:layout_constraintEnd_toStartOf="@+id/open"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

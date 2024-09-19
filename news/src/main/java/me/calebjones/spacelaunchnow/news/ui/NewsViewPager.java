@@ -16,11 +16,9 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import me.calebjones.spacelaunchnow.common.base.BaseFragment;
-import me.calebjones.spacelaunchnow.common.utils.Utils;
 import me.calebjones.spacelaunchnow.events.list.EventListFragment;
 import me.calebjones.spacelaunchnow.news.R;
 import me.calebjones.spacelaunchnow.news.ui.news.NewsListFragment;
-import me.calebjones.spacelaunchnow.news.ui.twitter.TwitterFragment;
 import timber.log.Timber;
 
 public class NewsViewPager extends BaseFragment {

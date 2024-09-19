@@ -13,18 +13,13 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import me.calebjones.spacelaunchnow.common.base.BaseFragment;
-import me.calebjones.spacelaunchnow.common.ui.launchdetail.fragments.mission.StageInformationAdapter;
-import me.calebjones.spacelaunchnow.common.utils.SimpleDividerItemDecoration;
 import me.calebjones.spacelaunchnow.data.models.main.dashboards.Starship;
 import me.calebjones.spacelaunchnow.starship.StarshipDashboardViewModel;
 import me.calebjones.spacelaunchnow.starship.data.StarshipDataRepository;
-import me.calebjones.spacelaunchnow.starship.ui.dashboard.RoadClosureAdapter;
 import me.spacelaunchnow.starship.R;
-import me.spacelaunchnow.starship.R2;
+import me.spacelaunchnow.starship.databinding.FragmentStarshipVehiclesBinding;
+import me.spacelaunchnow.starship.databinding.StarshipDashboardVehiclesBinding;
 
 /**
  * A fragment representing the Starship Dashboard
@@ -32,15 +27,13 @@ import me.spacelaunchnow.starship.R2;
 public class StarshipVehiclesFragment extends BaseFragment {
 
 
-    @BindView(R2.id.launcher_recycler)
-    RecyclerView launchRecycler;
-
     private StarshipDataRepository dataRepository;
     private boolean firstLaunch = true;
-    private Unbinder unbinder;
+
     private StarshipDashboardViewModel model;
     private LauncherAdapter launcherAdapter;
-
+    private FragmentStarshipVehiclesBinding binding;
+    private StarshipDashboardVehiclesBinding starshipDashboardVehiclesBinding;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -64,15 +57,18 @@ public class StarshipVehiclesFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_starship_vehicles, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        binding = FragmentStarshipVehiclesBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
+
+        starshipDashboardVehiclesBinding =  binding.starshipDashboardVehicles;
+
         setHasOptionsMenu(true);
         model = ViewModelProviders.of(getParentFragment()).get(StarshipDashboardViewModel.class);
         model.getStarshipDashboard().observe(this, this::updateViews);
 
         launcherAdapter = new LauncherAdapter(getContext());
-        launchRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
-        launchRecycler.setAdapter(launcherAdapter);
+        starshipDashboardVehiclesBinding.launcherRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        starshipDashboardVehiclesBinding.launcherRecycler.setAdapter(launcherAdapter);
 
         return view;
     }
@@ -98,7 +94,7 @@ public class StarshipVehiclesFragment extends BaseFragment {
 
 
     private void updateViews(Starship starship) {
-        if (starship.getVehicles().size() > 0) {
+        if (!starship.getVehicles().isEmpty()) {
             launcherAdapter.addItems(starship.getVehicles());
         }
     }

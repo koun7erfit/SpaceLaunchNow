@@ -27,13 +27,10 @@ import me.calebjones.spacelaunchnow.common.utils.SimpleDividerItemDecoration;
 import me.calebjones.spacelaunchnow.data.models.main.spacestation.Spacestation;
 import me.calebjones.spacelaunchnow.spacestation.data.Callbacks;
 import me.calebjones.spacelaunchnow.spacestation.data.SpacestationDataRepository;
+import me.calebjones.spacelaunchnow.spacestation.databinding.SpacestationsFragmentBinding;
 import timber.log.Timber;
 
 public class SpacestationListFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener {
-
-    private RecyclerView spacestationRecyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private SimpleStatefulLayout spacestationStatefulView;
 
     private String searchTerm;
     private SpacestationDataRepository dataRepository;
@@ -46,6 +43,7 @@ public class SpacestationListFragment extends BaseFragment implements SwipeRefre
     private EndlessRecyclerViewScrollListener scrollListener;
     private LinearLayoutManager linearLayoutManager;
     private boolean limitReached;
+    private SpacestationsFragmentBinding binding;
 
     public static SpacestationListFragment newInstance() {
         return new SpacestationListFragment();
@@ -62,45 +60,40 @@ public class SpacestationListFragment extends BaseFragment implements SwipeRefre
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.spacestations_fragment, container, false);
-        spacestationRecyclerView = view.findViewById(R.id.spacestation_recycler_view);
-        swipeRefreshLayout = view.findViewById(R.id.spacestation_refresh_layout);
-        spacestationStatefulView = view.findViewById(R.id.spacestation_stateful_view);
+        binding = SpacestationsFragmentBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
         setHasOptionsMenu(true);
 
         // Set the adapter
-        Context context = view.getContext();
+        Context context = getContext();
         adapter = new SpacestationRecyclerViewAdapter(context);
         linearLayoutManager = new LinearLayoutManager(context, RecyclerView.VERTICAL, false);
-        spacestationRecyclerView.setLayoutManager(linearLayoutManager);
-        spacestationRecyclerView.setAdapter(adapter);
+        binding.spacestationRecyclerView.setLayoutManager(linearLayoutManager);
+        binding.spacestationRecyclerView.setAdapter(adapter);
         if (firstLaunch) {
-            spacestationStatefulView.showProgress();
+            binding.spacestationStatefulView.showProgress();
         } else {
-            spacestationStatefulView.showContent();
+            binding.spacestationStatefulView.showContent();
         }
 
         canLoadMore = true;
         limitReached = false;
-        spacestationStatefulView.setOfflineRetryOnClickListener(v -> onRefresh());
+        binding.spacestationStatefulView.setOfflineRetryOnClickListener(v -> onRefresh());
         scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
                 // Triggered only when new data needs to be appended to the list
                 // Add whatever code is needed to append new items to the bottom of the list
                 if (canLoadMore) {
-                    boolean searchQuery = false;
-                    if (searchTerm != null) {
-                        searchQuery = true;
-                    }
+                    boolean searchQuery = searchTerm != null;
                     fetchData(false, false, searchQuery);
                 }
             }
         };
-        spacestationRecyclerView.addOnScrollListener(scrollListener);
+        binding.spacestationRecyclerView.addOnScrollListener(scrollListener);
         fetchData(false, firstLaunch, false);
         firstLaunch = false;
-        swipeRefreshLayout.setOnRefreshListener(this);
+        binding.spacestationRefreshLayout.setOnRefreshListener(this);
 
         return view;
     }
@@ -144,7 +137,7 @@ public class SpacestationListFragment extends BaseFragment implements SwipeRefre
                 @Override
                 public void onError(String message, @Nullable Throwable throwable) {
                     if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-                        spacestationStatefulView.showOffline();
+                        binding.spacestationStatefulView.showOffline();
                         statefulStateContentShow = false;
                         if (throwable != null) {
                             Timber.e(throwable);
@@ -159,14 +152,14 @@ public class SpacestationListFragment extends BaseFragment implements SwipeRefre
 
     private void updateAdapter(List<Spacestation> spacestations) {
 
-        if (spacestations.size() > 0) {
+        if (!spacestations.isEmpty()) {
             if (!statefulStateContentShow) {
-                spacestationStatefulView.showContent();
+                binding.spacestationStatefulView.showContent();
                 statefulStateContentShow = true;
             }
             adapter.addItems(spacestations);
         } else {
-            spacestationStatefulView.showEmpty();
+            binding.spacestationStatefulView.showEmpty();
             statefulStateContentShow = false;
             if (adapter != null) {
                 adapter.clear();
@@ -176,7 +169,7 @@ public class SpacestationListFragment extends BaseFragment implements SwipeRefre
     }
 
     private void showNetworkLoading(boolean refreshing) {
-        swipeRefreshLayout.setRefreshing(refreshing);
+        binding.spacestationRefreshLayout.setRefreshing(refreshing);
     }
 
 

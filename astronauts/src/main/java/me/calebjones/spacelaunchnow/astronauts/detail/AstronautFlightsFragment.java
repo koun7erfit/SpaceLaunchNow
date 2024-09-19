@@ -10,29 +10,21 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import me.calebjones.spacelaunchnow.common.base.BaseFragment;
 import me.calebjones.spacelaunchnow.common.prefs.ThemeHelper;
 import me.calebjones.spacelaunchnow.common.ui.adapters.ListAdapter;
 import me.calebjones.spacelaunchnow.common.utils.SimpleDividerItemDecoration;
 import me.calebjones.spacelaunchnow.data.models.main.astronaut.Astronaut;
-import me.spacelaunchnow.astronauts.R;
-import me.spacelaunchnow.astronauts.R2;
+import me.spacelaunchnow.astronauts.databinding.AstronautFlightFragmentBinding;
 
 public class AstronautFlightsFragment extends BaseFragment {
 
-    @BindView(R2.id.recycler_view)
-    RecyclerView recyclerView;
-
     private AstronautDetailViewModel mViewModel;
-    private Unbinder unbinder;
     private LinearLayoutManager linearLayoutManager;
     private ListAdapter adapter;
     private Context context;
+    private AstronautFlightFragmentBinding binding;
 
     public static AstronautFlightsFragment newInstance() {
         return new AstronautFlightsFragment();
@@ -47,14 +39,14 @@ public class AstronautFlightsFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.astronaut_flight_fragment, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        binding = AstronautFlightFragmentBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
         linearLayoutManager = new LinearLayoutManager(context);
 
         adapter = new ListAdapter(context, ThemeHelper.isDarkMode(getActivity()));
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.addItemDecoration(new SimpleDividerItemDecoration(context));
-        recyclerView.setAdapter(adapter);
+        binding.recyclerView.setLayoutManager(linearLayoutManager);
+        binding.recyclerView.addItemDecoration(new SimpleDividerItemDecoration(context));
+        binding.recyclerView.setAdapter(adapter);
         return view;
     }
 

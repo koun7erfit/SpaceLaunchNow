@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.MenuItemCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,31 +16,24 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import butterknife.Unbinder;
-import cz.kinst.jakub.view.SimpleStatefulLayout;
+
 import io.realm.RealmResults;
 import me.calebjones.spacelaunchnow.astronauts.data.Callbacks;
 import me.calebjones.spacelaunchnow.common.base.BaseFragment;
 import me.calebjones.spacelaunchnow.common.utils.EndlessRecyclerViewScrollListener;
 import me.calebjones.spacelaunchnow.common.utils.SimpleDividerItemDecoration;
-import me.calebjones.spacelaunchnow.common.utils.Utils;
 import me.calebjones.spacelaunchnow.data.models.main.Agency;
 import me.calebjones.spacelaunchnow.data.models.main.astronaut.Astronaut;
 import me.spacelaunchnow.astronauts.R;
-import me.spacelaunchnow.astronauts.R2;
 import me.calebjones.spacelaunchnow.astronauts.data.AstronautDataRepository;
+import me.spacelaunchnow.astronauts.databinding.FragmentAstronautListBinding;
 import timber.log.Timber;
 
 /**
@@ -59,7 +51,6 @@ public class AstronautListFragment extends BaseFragment implements SwipeRefreshL
     private boolean canLoadMore;
     private boolean statefulStateContentShow = false;
     private boolean firstLaunch = true;
-    private Unbinder unbinder;
     private AstronautRecyclerViewAdapter adapter;
     private EndlessRecyclerViewScrollListener scrollListener;
     private LinearLayoutManager linearLayoutManager;
@@ -67,17 +58,8 @@ public class AstronautListFragment extends BaseFragment implements SwipeRefreshL
     private Integer[] statusIDsSelection;
     private boolean limitReached;
     private SearchView searchView;
+    private FragmentAstronautListBinding binding;
 
-    @BindView(R2.id.astronaut_recycler_view)
-    RecyclerView recyclerView;
-    @BindView(R2.id.astronaut_stateful_view)
-    SimpleStatefulLayout statefulView;
-    @BindView(R2.id.astronaut_coordinator)
-    CoordinatorLayout coordinatorLayout;
-    @BindView(R2.id.astronaut_refresh_layout)
-    SwipeRefreshLayout swipeRefreshLayout;
-    @BindView(R2.id.astronaut_filter)
-    FloatingActionButton floatingActionButton;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -101,25 +83,26 @@ public class AstronautListFragment extends BaseFragment implements SwipeRefreshL
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_astronaut_list, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        binding = FragmentAstronautListBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
+
         setHasOptionsMenu(true);
 
         // Set the adapter
         Context context = view.getContext();
         adapter = new AstronautRecyclerViewAdapter(context);
         linearLayoutManager = new LinearLayoutManager(context, RecyclerView.VERTICAL, false);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setAdapter(adapter);
+        binding.astronautRecyclerView.setLayoutManager(linearLayoutManager);
+        binding.astronautRecyclerView.setAdapter(adapter);
         if(firstLaunch) {
-            statefulView.showProgress();
+            binding.astronautStatefulView.showProgress();
         } else {
-            statefulView.showContent();
+            binding.astronautStatefulView.showContent();
         }
 
         canLoadMore = true;
         limitReached = false;
-        statefulView.setOfflineRetryOnClickListener(v -> onRefresh());
+        binding.astronautStatefulView.setOfflineRetryOnClickListener(v -> onRefresh());
         scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
@@ -134,11 +117,12 @@ public class AstronautListFragment extends BaseFragment implements SwipeRefreshL
                 }
             }
         };
-        recyclerView.addItemDecoration(new SimpleDividerItemDecoration(context));
-        recyclerView.addOnScrollListener(scrollListener);
+        binding.astronautRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(context));
+        binding.astronautRecyclerView.addOnScrollListener(scrollListener);
         fetchData(false, firstLaunch, false);
         firstLaunch = false;
-        swipeRefreshLayout.setOnRefreshListener(this);
+        binding.astronautRefreshLayout.setOnRefreshListener(this);
+        binding.astronautFilter.setOnClickListener(view1 -> filterClicked());
         return view;
     }
 
@@ -181,7 +165,7 @@ public class AstronautListFragment extends BaseFragment implements SwipeRefreshL
                 @Override
                 public void onError(String message, @Nullable Throwable throwable) {
                     if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-                        statefulView.showOffline();
+                        binding.astronautStatefulView.showOffline();
                         statefulStateContentShow = false;
                         if (throwable != null) {
                             Timber.e(throwable);
@@ -226,19 +210,19 @@ public class AstronautListFragment extends BaseFragment implements SwipeRefreshL
     }
 
     private void showNetworkLoading(boolean refreshing) {
-        swipeRefreshLayout.setRefreshing(refreshing);
+        binding.astronautRefreshLayout.setRefreshing(refreshing);
     }
 
     private void updateAdapter(List<Astronaut> astronauts) {
 
         if (astronauts.size() > 0) {
             if (!statefulStateContentShow) {
-                statefulView.showContent();
+                binding.astronautStatefulView.showContent();
                 statefulStateContentShow = true;
             }
             adapter.addItems(astronauts);
         } else {
-            statefulView.showEmpty();
+            binding.astronautStatefulView.showEmpty();
             statefulStateContentShow = false;
             if (adapter != null) {
                 adapter.clear();
@@ -259,7 +243,7 @@ public class AstronautListFragment extends BaseFragment implements SwipeRefreshL
         if (searchTerm != null || statusIDs != null) {
             statusIDs = null;
             searchTerm = null;
-            swipeRefreshLayout.setRefreshing(false);
+            binding.astronautRefreshLayout.setRefreshing(false);
             fetchData(false, false, false);
         } else {
             fetchData(true, false, false);
@@ -286,7 +270,7 @@ public class AstronautListFragment extends BaseFragment implements SwipeRefreshL
         return false;
     }
 
-    @OnClick(R2.id.astronaut_filter)
+//    @OnClick(R2.id.astronaut_filter)
     void filterClicked(){
         new MaterialDialog.Builder(getContext())
                 .title("Astronaut Status")

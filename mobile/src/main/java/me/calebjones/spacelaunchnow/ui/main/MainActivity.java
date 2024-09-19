@@ -16,10 +16,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.appcompat.widget.Toolbar;
 
 import android.transition.Slide;
 import android.view.Menu;
@@ -29,13 +27,10 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.airbnb.deeplinkdispatch.DeepLink;
-import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -64,14 +59,14 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import jonathanfinerty.once.Amount;
 import jonathanfinerty.once.Once;
 import me.calebjones.spacelaunchnow.BuildConfig;
 import me.calebjones.spacelaunchnow.R;
 import me.calebjones.spacelaunchnow.common.base.BaseActivity;
 import me.calebjones.spacelaunchnow.common.ui.settings.SettingsActivity;
+import me.calebjones.spacelaunchnow.databinding.ActivityMainBinding;
 import me.calebjones.spacelaunchnow.events.list.EventListFragment;
 import me.calebjones.spacelaunchnow.spacestation.SpacestationListFragment;
 import me.calebjones.spacelaunchnow.common.ui.generate.Rate;
@@ -103,16 +98,7 @@ public class MainActivity extends BaseActivity implements GDPR.IGDPRCallback, Ne
 
     private static final String NAV_ITEM_ID = "navItemId";
     private static ListPreferences listPreferences;
-    @BindView(R.id.adView)
-    AdView adView;
-    @BindView(R.id.coordinatorLayout)
-    CoordinatorLayout coordinatorLayout;
-    @BindView(R.id.main_toolbar)
-    Toolbar toolbar;
-    @BindView(R.id.appBarLayout)
-    AppBarLayout appBarLayout;
-    @BindView(R.id.navigation_view)
-    BottomNavigationBar bottomNavigationView;
+
     private LaunchesViewPager mlaunchesViewPager;
     private NextLaunchFragment mUpcomingFragment;
     private NewsViewPager mNewsViewpagerFragment;
@@ -149,12 +135,18 @@ public class MainActivity extends BaseActivity implements GDPR.IGDPRCallback, Ne
     private boolean allowsPersonalAds = false;
     private boolean allowAds = false;
     private int adShowCount = 0;
+    private ActivityMainBinding binding;
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Timber.d("onCreate");
+        setTheme(R.style.BaseAppTheme);
+        super.onCreate(savedInstanceState);
 
-        int m_theme = R.style.BaseAppTheme;
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        View view = binding.getRoot();
+        setContentView(view);
 
         if (!Once.beenDone(Once.THIS_APP_INSTALL, "showTutorial")) {
             showFilter = true;
@@ -190,21 +182,15 @@ public class MainActivity extends BaseActivity implements GDPR.IGDPRCallback, Ne
         customTabActivityHelper = new CustomTabActivityHelper();
 
 
-        Timber.d("Setting theme.");
-        setTheme(m_theme);
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
         Timber.d("Binding views.");
-        ButterKnife.bind(this);
+
 
         adviewEnabled = false;
         hideAd();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            setupWindowAnimations();
-        }
+        setupWindowAnimations();
 
-        setSupportActionBar(toolbar);
+        setSupportActionBar(binding.mainToolbar);
         // load saved navigation state if present
 
         Timber.d("Building account header.");
@@ -221,13 +207,13 @@ public class MainActivity extends BaseActivity implements GDPR.IGDPRCallback, Ne
                 .setMinimumInstallTime(TimeUnit.DAYS.toMillis(3))
                 .setMessage(R.string.please_rate_short)
                 .setFeedbackAction(() -> showFeedback())
-                .setSnackBarParent(coordinatorLayout)
+                .setSnackBarParent(binding.coordinatorLayout)
                 .build();
 
         Timber.d("Building DrawerBuilder");
         drawer = new DrawerBuilder()
                 .withActivity(this)
-                .withToolbar(toolbar)
+                .withToolbar(binding.mainToolbar)
                 .withHasStableIds(true)
                 .withTranslucentStatusBar(false)
                 .withAccountHeader(headerResult)
@@ -235,7 +221,6 @@ public class MainActivity extends BaseActivity implements GDPR.IGDPRCallback, Ne
                         new PrimaryDrawerItem()
                                 .withName(R.string.home)
                                 .withIcon(GoogleMaterial.Icon.gmd_home)
-
                                 .withIdentifier(R.id.menu_home)
                                 .withSelectable(true),
                         new PrimaryDrawerItem()
@@ -292,7 +277,7 @@ public class MainActivity extends BaseActivity implements GDPR.IGDPRCallback, Ne
                                 .withIcon(GoogleMaterial.Icon.gmd_settings)
                                 .withIdentifier(R.id.menu_settings)
                                 .withSelectable(false)
-                ).withOnDrawerItemClickListener((view, position, drawerItem) -> {
+                ).withOnDrawerItemClickListener((v, position, drawerItem) -> {
                     if (drawerItem != null) {
                         if (mNavItemId != (int) drawerItem.getIdentifier()) {
                             navigate((int) drawerItem.getIdentifier());
@@ -330,7 +315,7 @@ public class MainActivity extends BaseActivity implements GDPR.IGDPRCallback, Ne
                             .withSelectable(false));
         }
 
-        bottomNavigationView
+        binding.navigationView
                 .addItem(new BottomNavigationItem(R.drawable.ic_favorite, getString(R.string.favorites))
                         .setActiveColorResource(R.color.md_red_700))
                 .addItem(new BottomNavigationItem(R.drawable.ic_satellite_white, getString(R.string.launches))
@@ -364,31 +349,25 @@ public class MainActivity extends BaseActivity implements GDPR.IGDPRCallback, Ne
 
     public void removeAppBarElevation() {
         getSupportActionBar().setElevation(0);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            appBarLayout.setElevation(0);
-            StateListAnimator stateListAnimator = new StateListAnimator();
-            stateListAnimator.addState(new int[0], ObjectAnimator.ofFloat(appBarLayout, "elevation", 0));
-            appBarLayout.setStateListAnimator(stateListAnimator);
-        }
+        binding.appBarLayout.setElevation(0);
+        StateListAnimator stateListAnimator = new StateListAnimator();
+        stateListAnimator.addState(new int[0], ObjectAnimator.ofFloat(binding.appBarLayout, "elevation", 0));
+        binding.appBarLayout.setStateListAnimator(stateListAnimator);
     }
 
     public void addAppBarElevation() {
         getSupportActionBar().setElevation(8);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            appBarLayout.setElevation(8);
-            StateListAnimator stateListAnimator = new StateListAnimator();
-            stateListAnimator.addState(new int[0], ObjectAnimator.ofFloat(appBarLayout, "elevation", 8));
-            appBarLayout.setStateListAnimator(stateListAnimator);
-        }
+        binding.appBarLayout.setElevation(8);
+        StateListAnimator stateListAnimator = new StateListAnimator();
+        stateListAnimator.addState(new int[0], ObjectAnimator.ofFloat(binding.appBarLayout, "elevation", 8));
+        binding.appBarLayout.setStateListAnimator(stateListAnimator);
     }
 
     private void setupWindowAnimations() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Slide slide = new Slide();
-            slide.setDuration(1000);
-            getWindow().setEnterTransition(slide);
-            getWindow().setReturnTransition(slide);
-        }
+        Slide slide = new Slide();
+        slide.setDuration(1000);
+        getWindow().setEnterTransition(slide);
+        getWindow().setReturnTransition(slide);
     }
 
     @Override
@@ -434,9 +413,11 @@ public class MainActivity extends BaseActivity implements GDPR.IGDPRCallback, Ne
         if (rate != null) {
             rate.count();
         }
+
         if (BuildConfig.DEBUG) {
             showRemainingCount();
         }
+
         if (!rate.isShown()) {
             if (!Once.beenDone(Once.THIS_APP_VERSION, "showChangelog")
                     && Once.beenDone("appOpen", Amount.moreThan(2))) {
@@ -503,7 +484,7 @@ public class MainActivity extends BaseActivity implements GDPR.IGDPRCallback, Ne
 
     private void showRemoveAd() {
         snackbar = Snackbar
-                .make(coordinatorLayout, R.string.upgrade_pro, Snackbar.LENGTH_INDEFINITE)
+                .make(binding.coordinatorLayout, R.string.upgrade_pro, Snackbar.LENGTH_INDEFINITE)
                 .setActionTextColor(ContextCompat.getColor(context, R.color.colorAccent))
                 .setAction(getString(R.string.show_me), view -> {
                     Once.markDone("userCheckedSupporter");
@@ -538,7 +519,7 @@ public class MainActivity extends BaseActivity implements GDPR.IGDPRCallback, Ne
 
     private void showChangelogSnackBar() {
         snackbar = Snackbar
-                .make(coordinatorLayout, getString(R.string.updated_version) + " " + Utils.getVersionName(context), Snackbar.LENGTH_LONG)
+                .make(binding.coordinatorLayout, getString(R.string.updated_version) + " " + Utils.getVersionName(context), Snackbar.LENGTH_LONG)
                 .setActionTextColor(ContextCompat.getColor(context, R.color.colorPrimary))
                 .setAction("Changelog", view -> showWhatsNew());
         snackbar.show();
@@ -562,7 +543,7 @@ public class MainActivity extends BaseActivity implements GDPR.IGDPRCallback, Ne
     }
 
     public void setActionBarTitle(String title) {
-        toolbar.setTitle(title);
+        binding.mainToolbar.setTitle(title);
     }
 
     @Override
@@ -895,13 +876,13 @@ public class MainActivity extends BaseActivity implements GDPR.IGDPRCallback, Ne
     }
 
     private void hideAd() {
-        adView.setVisibility(View.GONE);
+        binding.adView.setVisibility(View.GONE);
     }
 
     private void showAd() {
         Timber.v("Showing Ad!");
-        if ((adviewEnabled && adView.getVisibility() == View.GONE) || (adviewEnabled && adView.getVisibility() == View.INVISIBLE)) {
-            adView.setVisibility(View.VISIBLE);
+        if ((adviewEnabled && binding.adView.getVisibility() == View.GONE) || (adviewEnabled && binding.adView.getVisibility() == View.INVISIBLE)) {
+            binding.adView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1050,14 +1031,14 @@ public class MainActivity extends BaseActivity implements GDPR.IGDPRCallback, Ne
         if (!SupporterHelper.isSupporter() && allowAds) {
             Timber.d("Loading ads.");
             if (allowsPersonalAds) {
-                adView.loadAd(new AdRequest.Builder().build());
+                binding.adView.loadAd(new AdRequest.Builder().build());
             } else {
                 Bundle extras = new Bundle();
                 extras.putString("npa", "1");
 
-                adView.loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
+                binding.adView.loadAd(new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build());
             }
-            adView.setAdListener(new AdListener() {
+            binding.adView.setAdListener(new AdListener() {
 
                 @Override
                 public void onAdLoaded() {

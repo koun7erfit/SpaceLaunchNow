@@ -13,26 +13,18 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ShareCompat;
 import androidx.core.content.ContextCompat;
-import androidx.appcompat.widget.Toolbar;
 
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.airbnb.deeplinkdispatch.DeepLink;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.tabs.TabLayout;
-
 import java.util.Date;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
@@ -40,18 +32,13 @@ import java.util.concurrent.TimeUnit;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager.widget.ViewPager;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import cz.kinst.jakub.view.SimpleStatefulLayout;
-import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
 import jonathanfinerty.once.Amount;
 import jonathanfinerty.once.Once;
 import me.calebjones.spacelaunchnow.common.R;
-import me.calebjones.spacelaunchnow.common.R2;
 import me.calebjones.spacelaunchnow.common.base.BaseActivity;
 import me.calebjones.spacelaunchnow.common.customtab.CustomTabActivityHelper;
+import me.calebjones.spacelaunchnow.common.databinding.ActivityLaunchDetailBinding;
 import me.calebjones.spacelaunchnow.common.ui.generate.Rate;
 import me.calebjones.spacelaunchnow.common.ui.launchdetail.data.Callbacks;
 import me.calebjones.spacelaunchnow.common.ui.launchdetail.data.DetailsDataRepository;
@@ -73,32 +60,32 @@ public class LaunchDetailActivity extends BaseActivity
         implements AppBarLayout.OnOffsetChangedListener, SwipeRefreshLayout.OnRefreshListener {
 
 
-    @BindView(R2.id.fab_share)
-    FloatingActionButton fabShare;
-    @BindView(R2.id.stateful_view)
-    SimpleStatefulLayout statefulView;
-    @BindView(R2.id.adView)
-    AdView adView;
-    @BindView(R2.id.detail_profile_image)
-    CircleImageView detail_profile_image;
-    @BindView(R2.id.detail_title)
-    TextView detail_rocket;
-    @BindView(R2.id.detail_mission_location)
-    TextView detail_mission_location;
-    @BindView(R2.id.detail_viewpager)
-    ViewPager viewPager;
-    @BindView(R2.id.rootview)
-    CoordinatorLayout coordinatorLayout;
-    @BindView(R2.id.detail_swipe_refresh)
-    SwipeRefreshLayout detailSwipeRefresh;
-    @BindView(R2.id.detail_tabs)
-    TabLayout tabLayout;
-    @BindView(R2.id.detail_profile_backdrop)
-    ImageView detail_profile_backdrop;
-    @BindView(R2.id.detail_appbar)
-    AppBarLayout appBarLayout;
-    @BindView(R2.id.detail_toolbar)
-    Toolbar toolbar;
+//    @BindView(R2.id.fab_share)
+//    FloatingActionButton fabShare;
+//    @BindView(R2.id.stateful_view)
+//    SimpleStatefulLayout statefulView;
+//    @BindView(R2.id.adView)
+//    AdView adView;
+//    @BindView(R2.id.detail_profile_image)
+//    CircleImageView detail_profile_image;
+//    @BindView(R2.id.detail_title)
+//    TextView detail_rocket;
+//    @BindView(R2.id.detail_mission_location)
+//    TextView detail_mission_location;
+//    @BindView(R2.id.detail_viewpager)
+//    ViewPager viewPager;
+//    @BindView(R2.id.rootview)
+//    CoordinatorLayout coordinatorLayout;
+//    @BindView(R2.id.detail_swipe_refresh)
+//    SwipeRefreshLayout detailSwipeRefresh;
+//    @BindView(R2.id.detail_tabs)
+//    TabLayout tabLayout;
+//    @BindView(R2.id.detail_profile_backdrop)
+//    ImageView detail_profile_backdrop;
+//    @BindView(R2.id.detail_appbar)
+//    AppBarLayout appBarLayout;
+//    @BindView(R2.id.detail_toolbar)
+//    Toolbar toolbar;
 
     private static final int PERCENTAGE_TO_ANIMATE_AVATAR = 20;
     private boolean mIsAvatarShown = true;
@@ -122,11 +109,16 @@ public class LaunchDetailActivity extends BaseActivity
     private Boolean fromNotification = false;
     private Boolean fromLink = false;
     private static final String ACTION_DEEP_LINK = "deep_link";
+    private ActivityLaunchDetailBinding binding;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        binding = ActivityLaunchDetailBinding.inflate(getLayoutInflater());
+        View view = binding.getRoot();
+        setContentView(view);
 
         realm = getRealm();
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -135,8 +127,6 @@ public class LaunchDetailActivity extends BaseActivity
         sharedPreference = ListPreferences.getInstance(context);
         detailsDataRepository = new DetailsDataRepository(context, getRealm());
 
-//        statusColor = getCyanea().getPrimaryDark();
-
         if (getSharedPreferences("theme_changed", 0).getBoolean("recreate", false)) {
             SharedPreferences.Editor editor = getSharedPreferences("theme_changed", 0).edit();
             editor.putBoolean("recreate", false);
@@ -144,51 +134,48 @@ public class LaunchDetailActivity extends BaseActivity
             recreate();
         }
 
-        setContentView(R.layout.activity_launch_detail);
-        ButterKnife.bind(this);
         model = ViewModelProviders.of(this).get(DetailsViewModel.class);
         // update UI
         model.getLaunch().observe(this, this::updateViews);
 
-
-        detailSwipeRefresh.setOnRefreshListener(this);
-        fabShare.hide();
-        statefulView.showProgress();
-        statefulView.setOfflineRetryOnClickListener(v -> fetchDataFromNetwork(launchId));
+        binding.detailSwipeRefresh.setOnRefreshListener(this);
+        binding.fabShare.hide();
+        binding.statefulView.showProgress();
+        binding.statefulView.setOfflineRetryOnClickListener(v -> fetchDataFromNetwork(launchId));
 
         rate = new Rate.Builder(context)
                 .setTriggerCount(10)
                 .setMinimumInstallTime(TimeUnit.DAYS.toMillis(3))
                 .setMessage(R.string.please_rate_short)
-                .setFeedbackAction(() -> showFeedback())
-                .setSnackBarParent(coordinatorLayout)
+                .setFeedbackAction(this::showFeedback)
+                .setSnackBarParent(binding.rootview)
                 .build();
 
         rate.showRequest();
         if (!SupporterHelper.isSupporter() && Once.beenDone("appOpen",
                 Amount.moreThan(3))) {
             AdRequest adRequest = new AdRequest.Builder().build();
-            adView.loadAd(adRequest);
-            adView.setAdListener(new AdListener() {
+            binding.adView.loadAd(adRequest);
+            binding.adView.setAdListener(new AdListener() {
 
                 @Override
                 public void onAdLoaded() {
-                    adView.setVisibility(View.VISIBLE);
+                    binding.adView.setVisibility(View.VISIBLE);
                 }
 
             });
         } else {
-            adView.setVisibility(View.GONE);
+            binding.adView.setVisibility(View.GONE);
         }
 
-        appBarLayout.addOnOffsetChangedListener(new CustomOnOffsetChangedListener(statusColor, getWindow()));
-        appBarLayout.addOnOffsetChangedListener(this);
-        mMaxScrollSize = appBarLayout.getTotalScrollRange();
+        binding.detailAppbar.addOnOffsetChangedListener(new CustomOnOffsetChangedListener(statusColor, getWindow()));
+        binding.detailAppbar.addOnOffsetChangedListener(this);
+        mMaxScrollSize = binding.detailAppbar.getTotalScrollRange();
 
         tabAdapter = new TabsAdapter(this);
-        viewPager.setAdapter(tabAdapter);
-        viewPager.setOffscreenPageLimit(3);
-        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        binding.detailViewpager.setAdapter(tabAdapter);
+        binding.detailViewpager.setOffscreenPageLimit(3);
+        binding.detailViewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float v, int i1) {
             }
@@ -203,7 +190,7 @@ public class LaunchDetailActivity extends BaseActivity
             }
         });
 
-        tabLayout.setupWithViewPager(viewPager);
+        binding.detailTabs.setupWithViewPager(binding.detailViewpager);
 
         //Grab information from Intent
         Intent mIntent = getIntent();
@@ -227,20 +214,17 @@ public class LaunchDetailActivity extends BaseActivity
         }
 
 
-        if (toolbar != null) {
-            setSupportActionBar(toolbar);
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                getSupportActionBar().setHomeButtonEnabled(true);
-                getSupportActionBar().setDisplayShowTitleEnabled(false);
-            }
+        setSupportActionBar(binding.detailToolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
+        binding.fabShare.setOnClickListener(v -> onViewClicked());
     }
 
     private void enableDisableSwipeRefresh(boolean enable) {
-        if (detailSwipeRefresh != null) {
-            detailSwipeRefresh.setEnabled(enable);
-        }
+        binding.detailSwipeRefresh.setEnabled(enable);
     }
 
     private void fetchDataFromNetworkBySlug(String launchId) {
@@ -260,10 +244,10 @@ public class LaunchDetailActivity extends BaseActivity
 
                 if (throwable != null) {
                     Timber.e(throwable);
-                    SnackbarHandler.showErrorSnackbar(context, coordinatorLayout, String.format("Error: %s", throwable.getLocalizedMessage()));
+                    SnackbarHandler.showErrorSnackbar(context, binding.rootview, String.format("Error: %s", throwable.getLocalizedMessage()));
                 } else {
                     Timber.e(message);
-                    SnackbarHandler.showErrorSnackbar(context, coordinatorLayout, message);
+                    SnackbarHandler.showErrorSnackbar(context, binding.rootview, message);
                 }
                 if (fromLink) {
                     Toast.makeText(context, message, Toast.LENGTH_LONG).show();
@@ -275,7 +259,7 @@ public class LaunchDetailActivity extends BaseActivity
 
             @Override
             public void onLaunchDeleted() {
-                SnackbarHandler.showErrorSnackbar(context, coordinatorLayout, "Error: Launch not found.");
+                SnackbarHandler.showErrorSnackbar(context, binding.rootview, "Error: Launch not found.");
             }
         });
     }
@@ -296,17 +280,17 @@ public class LaunchDetailActivity extends BaseActivity
             public void onError(String message, @Nullable Throwable throwable) {
                 if (throwable != null) {
                     Timber.e(throwable);
-                    SnackbarHandler.showErrorSnackbar(context, coordinatorLayout, String.format("Error: %s", throwable.getLocalizedMessage()));
+                    SnackbarHandler.showErrorSnackbar(context, binding.rootview, String.format("Error: %s", throwable.getLocalizedMessage()));
                 } else {
                     Timber.e(message);
-                    SnackbarHandler.showErrorSnackbar(context, coordinatorLayout, message);
+                    SnackbarHandler.showErrorSnackbar(context, binding.rootview, message);
                 }
                 fetchDataFromDatabase(launchId);
             }
 
             @Override
             public void onLaunchDeleted() {
-                SnackbarHandler.showErrorSnackbar(context, coordinatorLayout, "Error: Launch not found.");
+                SnackbarHandler.showErrorSnackbar(context, binding.rootview, "Error: Launch not found.");
             }
         });
     }
@@ -316,8 +300,8 @@ public class LaunchDetailActivity extends BaseActivity
         if (launch != null) {
             updateViewModel(launch);
         } else {
-            statefulView.showEmpty();
-            SnackbarHandler.showErrorSnackbar(context, coordinatorLayout, "Unable to load launch.");
+            binding.statefulView.showEmpty();
+            SnackbarHandler.showErrorSnackbar(context, binding.rootview, "Unable to load launch.");
         }
     }
 
@@ -349,12 +333,12 @@ public class LaunchDetailActivity extends BaseActivity
 
     private void showLoading() {
         Timber.v("Show Loading...");
-        detailSwipeRefresh.post(() -> detailSwipeRefresh.setRefreshing(true));
+        binding.detailSwipeRefresh.post(() -> binding.detailSwipeRefresh.setRefreshing(true));
     }
 
     private void hideLoading() {
         Timber.v("Hide Loading...");
-        detailSwipeRefresh.post(() -> detailSwipeRefresh.setRefreshing(false));
+        binding.detailSwipeRefresh.post(() -> binding.detailSwipeRefresh.setRefreshing(false));
     }
 
     private void showFeedback() {
@@ -403,10 +387,10 @@ public class LaunchDetailActivity extends BaseActivity
             fabShowable = true;
             this.launch = launch;
             setTitleView(launch);
-            fabShare.show();
-            statefulView.showContent();
+            binding.fabShare.show();
+            binding.statefulView.showContent();
         } else {
-            statefulView.showEmpty();
+            binding.statefulView.showEmpty();
         }
     }
 
@@ -415,26 +399,26 @@ public class LaunchDetailActivity extends BaseActivity
             Timber.v("Loading detailLaunch %s", launch.getId());
             findProfileLogo(launch);
             findRocketImage(launch);
-            detail_mission_location.setText(launch.getPad().getName());
-            detail_rocket.setText(launch.getName());
+            binding.detailMissionLocation.setText(launch.getPad().getName());
+            binding.detailTitle.setText(launch.getName());
         } else if (this.isDestroyed()) {
             Timber.v("DetailLaunch is destroyed, stopping loading data.");
         }
     }
 
     private void findRocketImage(Launch launch) {
-        if (launch.getImgUrl() != null && launch.getImgUrl().length() > 0) {
+        if (launch.getImgUrl() != null && !launch.getImgUrl().isEmpty()) {
             GlideApp.with(this)
                     .load(launch.getImgUrl())
-                    .into(detail_profile_backdrop);
+                    .into(binding.detailProfileBackdrop);
         } else if (launch.getRocket().getConfiguration().getName() != null) {
             if (launch.getRocket().getConfiguration().getImageUrl() != null
-                    && launch.getRocket().getConfiguration().getImageUrl().length() > 0
+                    && !launch.getRocket().getConfiguration().getImageUrl().isEmpty()
                     && !launch.getRocket().getConfiguration().getImageUrl().contains("placeholder")) {
                 final String image = launch.getRocket().getConfiguration().getImageUrl();
                 GlideApp.with(this)
                         .load(image)
-                        .into(detail_profile_backdrop);
+                        .into(binding.detailProfileBackdrop);
             }
         }
     }
@@ -484,7 +468,7 @@ public class LaunchDetailActivity extends BaseActivity
                 .load(url)
                 .placeholder(R.drawable.icon_international)
                 .error(R.drawable.icon_international)
-                .into(detail_profile_image);
+                .into(binding.detailProfileImage);
     }
 
     @Override
@@ -515,22 +499,22 @@ public class LaunchDetailActivity extends BaseActivity
 
         if (percentage >= PERCENTAGE_TO_ANIMATE_AVATAR && mIsAvatarShown) {
             mIsAvatarShown = false;
-            detail_profile_image.animate()
+            binding.detailProfileImage.animate()
                     .scaleY(0).scaleX(0)
                     .setDuration(200)
                     .start();
-            fabShare.hide();
+            binding.fabShare.hide();
         }
 
         if (percentage <= PERCENTAGE_TO_ANIMATE_AVATAR && !mIsAvatarShown) {
             mIsAvatarShown = true;
 
-            detail_profile_image.animate()
+            binding.detailProfileImage.animate()
                     .scaleY(1).scaleX(1)
                     .start();
 
             if (fabShowable) {
-                fabShare.show();
+                binding.fabShare.show();
             }
         }
     }
@@ -557,7 +541,6 @@ public class LaunchDetailActivity extends BaseActivity
         }
     }
 
-    @OnClick(R2.id.fab_share)
     public void onViewClicked() {
         String launchDate = "";
         String message = "";
@@ -570,10 +553,6 @@ public class LaunchDetailActivity extends BaseActivity
             }
             if (launch.getPad().getLocation() != null) {
 
-                message = launch.getName() + " launching from "
-                        + launch.getPad().getLocation().getName() + "\n\n"
-                        + launchDate;
-            } else if (launch.getPad().getLocation() != null) {
                 message = launch.getName() + " launching from "
                         + launch.getPad().getLocation().getName() + "\n\n"
                         + launchDate;
@@ -592,7 +571,7 @@ public class LaunchDetailActivity extends BaseActivity
                     .setText(launch.getSlug())
                     .startChooser();
         } else {
-            SnackbarHandler.showErrorSnackbar(this, coordinatorLayout, "Error - unable to share this launch.");
+            SnackbarHandler.showErrorSnackbar(this, binding.rootview, "Error - unable to share this launch.");
         }
     }
 
@@ -643,7 +622,7 @@ public class LaunchDetailActivity extends BaseActivity
             fromLink = false;
             finish();
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            Timber.e(e);
         }
     }
 

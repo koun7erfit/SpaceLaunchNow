@@ -11,7 +11,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <include layout="@layout/starship_dashboard_upcoming" />
+                <include
+                    android:id="@+id/starship_dashboard_upcoming_view"
+                    layout="@layout/starship_dashboard_upcoming" />
 
             </androidx.core.widget.NestedScrollView>
 

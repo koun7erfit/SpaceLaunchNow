@@ -266,27 +266,6 @@
 
         </androidx.cardview.widget.CardView>
 
-        <me.calebjones.spacelaunchnow.common.ui.views.custom.WeatherCard
-            android:id="@+id/weather_card"
-            android:layout_width="@dimen/max_width"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginStart="@dimen/material_card_edge_margin"
-            android:layout_marginTop="@dimen/material_card_edge_margin"
-            android:layout_marginEnd="@dimen/material_card_edge_margin"
-            android:layout_marginBottom="@dimen/material_baseline_grid_4x"
-            android:animateLayoutChanges="true"
-            android:paddingStart="@dimen/material_card_edge_margin"
-            android:paddingTop="@dimen/material_card_edge_margin"
-            android:paddingEnd="@dimen/material_card_edge_margin"
-            android:paddingBottom="@dimen/material_baseline_grid_4x"
-            android:visibility="gone"
-            android:background="?cardBackground"
-            app:cardCornerRadius="4dp"
-            app:cardElevation="@dimen/material_card_elevation_resting"
-            app:cardPreventCornerOverlap="true"
-            app:cardUseCompatPadding="true" />
-
     </LinearLayout>
 
 </androidx.core.widget.NestedScrollView>

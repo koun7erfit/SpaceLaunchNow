@@ -13,17 +13,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-import cz.kinst.jakub.view.SimpleStatefulLayout;
-import me.calebjones.spacelaunchnow.data.models.main.spacecraft.SpacecraftStage;
+
 import me.calebjones.spacelaunchnow.data.models.main.spacestation.DockingLocation;
-import me.calebjones.spacelaunchnow.spacestation.R2;
 import me.calebjones.spacelaunchnow.common.base.BaseFragment;
 import me.calebjones.spacelaunchnow.data.models.main.spacestation.Spacestation;
-import me.calebjones.spacelaunchnow.spacestation.R;
+import me.calebjones.spacelaunchnow.spacestation.databinding.SpacestationDockingFragmentBinding;
 import me.calebjones.spacelaunchnow.spacestation.detail.SpacestationDetailViewModel;
 import me.calebjones.spacelaunchnow.spacestation.detail.adapter.DockingLocationItem;
 import me.calebjones.spacelaunchnow.spacestation.detail.adapter.ListItem;
@@ -31,16 +25,11 @@ import me.calebjones.spacelaunchnow.spacestation.detail.adapter.SpacestationAdap
 
 public class SpacestationDockedVehiclesFragment extends BaseFragment {
 
-    @BindView(R2.id.recycler_view)
-    RecyclerView recyclerView;
-    @BindView(R2.id.stateful_view)
-    SimpleStatefulLayout simpleStatefulLayout;
-
     private SpacestationDetailViewModel mViewModel;
-    private Unbinder unbinder;
     private LinearLayoutManager linearLayoutManager;
     private SpacestationAdapter adapter;
     private Context context;
+    private SpacestationDockingFragmentBinding binding;
 
     public static SpacestationDockedVehiclesFragment newInstance() {
         return new SpacestationDockedVehiclesFragment();
@@ -55,13 +44,13 @@ public class SpacestationDockedVehiclesFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.spacestation_docking_fragment, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        binding = SpacestationDockingFragmentBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
         linearLayoutManager = new LinearLayoutManager(context);
         adapter = new SpacestationAdapter(context);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setAdapter(adapter);
-        simpleStatefulLayout.showProgress();
+        binding.recyclerView.setLayoutManager(linearLayoutManager);
+        binding.recyclerView.setAdapter(adapter);
+        binding.statefulView.showProgress();
         return view;
     }
 
@@ -86,9 +75,9 @@ public class SpacestationDockedVehiclesFragment extends BaseFragment {
             adapter.addItems(items);
         }
         if (adapter.getItemCount() > 0) {
-            simpleStatefulLayout.showContent();
+            binding.statefulView.showContent();
         } else {
-            simpleStatefulLayout.showEmpty();
+            binding.statefulView.showEmpty();
         }
     }
 }

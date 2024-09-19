@@ -1,12 +1,12 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'com.jakewharton.butterknife'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
-
+    buildFeatures {
+        viewBinding true
+    }
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
@@ -53,10 +53,6 @@ dependencies {
     implementation deps.okhttpLogging
     implementation deps.constraintLayout
 
-    //Twitter
-    implementation deps.twitterCore
-    implementation deps.twitterUi
-
     implementation deps.glide
     kapt 'com.github.bumptech.glide:compiler:4.8.0'
 
@@ -64,9 +60,6 @@ dependencies {
 
     implementation deps.easyprefs
     implementation deps.once
-
-    implementation deps.butterknife
-    annotationProcessor deps.butterknifeCompiler
 
 }
 repositories {

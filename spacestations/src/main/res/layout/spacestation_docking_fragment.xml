@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cz.kinst.jakub.view.SimpleStatefulLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/stateful_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:emptyLayout="@layout/empty_docked"
-    app:progressLayout="@layout/custom_progress">
+    android:layout_height="match_parent">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view"
+    <cz.kinst.jakub.view.SimpleStatefulLayout
+        android:id="@+id/stateful_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:emptyLayout="@layout/empty_docked"
+        app:progressLayout="@layout/custom_progress">
 
-</cz.kinst.jakub.view.SimpleStatefulLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </cz.kinst.jakub.view.SimpleStatefulLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

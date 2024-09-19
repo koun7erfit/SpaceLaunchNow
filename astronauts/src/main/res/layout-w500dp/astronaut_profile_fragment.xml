@@ -253,7 +253,6 @@
                     android:paddingStart="32dp"
                     android:layout_marginStart="32dp"
                     android:layout_marginEnd="32dp"
-                    tools:src="@drawable/ic_splash"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/lsp_type" />

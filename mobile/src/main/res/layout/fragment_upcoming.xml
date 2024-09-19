@@ -127,7 +127,9 @@
                 </LinearLayout>
             </RelativeLayout>
 
-            <include layout="@layout/color_reveal" />
+            <include
+                android:id="@+id/color_reveal"
+                layout="@layout/color_reveal" />
 
             <androidx.coordinatorlayout.widget.CoordinatorLayout
                 android:id="@+id/coordinator_layout"

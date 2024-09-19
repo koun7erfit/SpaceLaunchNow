@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import me.calebjones.spacelaunchnow.common.GlideApp;
 import me.calebjones.spacelaunchnow.common.utils.Utils;
 import me.calebjones.spacelaunchnow.data.models.main.spacestation.Spacestation;
+import me.calebjones.spacelaunchnow.spacestation.databinding.SpacestationItemBinding;
 import me.calebjones.spacelaunchnow.spacestation.detail.SpacestationDetailsActivity;
 
 
@@ -28,6 +29,7 @@ public class SpacestationRecyclerViewAdapter extends RecyclerView.Adapter<Spaces
 
     private List<Spacestation> spacestations;
     private Context context;
+    private SpacestationItemBinding binding;
 
     public SpacestationRecyclerViewAdapter(Context context) {
         spacestations = new ArrayList<>();
@@ -46,46 +48,45 @@ public class SpacestationRecyclerViewAdapter extends RecyclerView.Adapter<Spaces
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.spacestation_item, parent, false);
-        return new ViewHolder(view);
+        binding = SpacestationItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        return new ViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = spacestations.get(position);
-        holder.spacestationTitle.setText(holder.mItem.getName());
-        holder.spacestationSubtitle.setText(holder.mItem.getType().getName());
-        holder.spacestationDescription.setText(holder.mItem.getDescription());
-        holder.orbitlPillText.setText(holder.mItem.getOrbit());
-        holder.founded.setText(Utils.getSimpleDateFormatForUI("MMMM dd, yyyy").format((holder.mItem.getFounded())));
+        holder.binding.spacestationTitle.setText(holder.mItem.getName());
+        holder.binding.spacestaionSubtitle.setText(holder.mItem.getType().getName());
+        holder.binding.spacestationDescription.setText(holder.mItem.getDescription());
+        holder.binding.orbitText.setText(holder.mItem.getOrbit());
+        holder.binding.founded.setText(Utils.getSimpleDateFormatForUI("MMMM dd, yyyy").format((holder.mItem.getFounded())));
         if (holder.mItem.getDeorbited() != null) {
-            holder.deorbited.setText(Utils.getSimpleDateFormatForUI("MMMM dd, yyyy").format((holder.mItem.getDeorbited())));
+            holder.binding.deorbited.setText(Utils.getSimpleDateFormatForUI("MMMM dd, yyyy").format((holder.mItem.getDeorbited())));
         } else {
-            holder.deorbited.setText("N/A");
+            holder.binding.deorbited.setText("N/A");
         }
 
         if (holder.mItem.getStatus() != null){
-            holder.statusPillText.setText(holder.mItem.getStatus().getName());
+            holder.binding.statusText.setText(holder.mItem.getStatus().getName());
             switch (holder.mItem.getStatus().getId()){
                 case 1:
-                    holder.statusPill.setCardBackgroundColor(ContextCompat.getColor(context, R.color.material_color_green_500));
+                    holder.binding.statusPillLayout.setCardBackgroundColor(ContextCompat.getColor(context, R.color.material_color_green_500));
                     break;
                 case 2:
-                    holder.statusPill.setCardBackgroundColor(ContextCompat.getColor(context, R.color.material_color_red_500));
+                    holder.binding.statusPillLayout.setCardBackgroundColor(ContextCompat.getColor(context, R.color.material_color_red_500));
                     break;
                 case 3:
-                    holder.statusPill.setCardBackgroundColor(ContextCompat.getColor(context, R.color.material_color_deep_orange_500));
+                    holder.binding.statusPillLayout.setCardBackgroundColor(ContextCompat.getColor(context, R.color.material_color_deep_orange_500));
                     break;
                 default:
-                    holder.statusPill.setCardBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimary));
+                    holder.binding.statusPillLayout.setCardBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimary));
                     break;
             }
         }
 
         GlideApp.with(context)
                 .load(holder.mItem.getImageUrl())
-                .into(holder.spacestationImage);
+                .into(holder.binding.spacestationImage);
     }
 
     @Override
@@ -94,34 +95,14 @@ public class SpacestationRecyclerViewAdapter extends RecyclerView.Adapter<Spaces
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        private ImageView spacestationImage;
-        private TextView spacestationTitle;
-        private TextView spacestationSubtitle;
-        private TextView spacestationDescription;
-        private CardView orbitPill;
-        private TextView orbitlPillText;
-        private CardView statusPill;
-        private TextView statusPillText;
-        private TextView founded;
-        private TextView deorbited;
-        private AppCompatButton button;
+
+        private SpacestationItemBinding binding;
         public Spacestation mItem;
 
-        public ViewHolder(View view) {
-            super(view);
-            spacestationImage = view.findViewById(R.id.spacestation_image);
-            spacestationTitle = view.findViewById(R.id.spacestation_title);
-            spacestationSubtitle = view.findViewById(R.id.spacestaion_subtitle);
-            spacestationDescription = view.findViewById(R.id.spacestation_description);
-            orbitPill = view.findViewById(R.id.orbit_pill_layout);
-            orbitlPillText = view.findViewById(R.id.orbit_text);
-            statusPill = view.findViewById(R.id.status_pill_layout);
-            statusPillText = view.findViewById(R.id.status_text);
-            founded = view.findViewById(R.id.founded);
-            deorbited = view.findViewById(R.id.deorbited);
-
-            button = view.findViewById(R.id.spacestation_button);
-            button.setOnClickListener(v -> {
+        public ViewHolder(SpacestationItemBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+            binding.spacestationButton.setOnClickListener(v -> {
             Spacestation spacestation = spacestations.get(getAdapterPosition());
             Intent exploreIntent = new Intent(context, SpacestationDetailsActivity.class);
             exploreIntent.putExtra("spacestationId", spacestation.getId());

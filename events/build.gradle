@@ -1,8 +1,10 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.jakewharton.butterknife'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
+    buildFeatures {
+        viewBinding true
+    }
 
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion
@@ -75,8 +77,6 @@ dependencies {
     implementation deps.weathericon
     implementation deps.fontawesomeTypeface
 
-    implementation deps.butterknife
-    annotationProcessor deps.butterknifeCompiler
 
     implementation deps.glide
     annotationProcessor deps.glideCompiler

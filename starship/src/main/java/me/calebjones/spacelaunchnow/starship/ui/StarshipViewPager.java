@@ -18,17 +18,11 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-import cz.kinst.jakub.view.SimpleStatefulLayout;
+
 import me.calebjones.spacelaunchnow.common.base.BaseFragment;
-import me.calebjones.spacelaunchnow.common.utils.Utils;
 import me.calebjones.spacelaunchnow.data.models.main.dashboards.Starship;
 import me.calebjones.spacelaunchnow.starship.StarshipDashboardViewModel;
 import me.calebjones.spacelaunchnow.starship.data.Callbacks;
@@ -37,27 +31,17 @@ import me.calebjones.spacelaunchnow.starship.ui.dashboard.StarshipDashboardFragm
 import me.calebjones.spacelaunchnow.starship.ui.upcoming.StarshipUpcomingFragment;
 import me.calebjones.spacelaunchnow.starship.ui.vehicles.StarshipVehiclesFragment;
 import me.spacelaunchnow.starship.R;
-import me.spacelaunchnow.starship.R2;
+import me.spacelaunchnow.starship.databinding.StarshipFragmentViewPagerBinding;
 import timber.log.Timber;
 
 public class StarshipViewPager extends BaseFragment {
-
-
-    @BindView(R2.id.tabLayout)
-    TabLayout tabLayout;
-    @BindView(R2.id.viewpager)
-    ViewPager viewPager;
-    @BindView(R2.id.swipe_refresh)
-    SwipeRefreshLayout swipeRefresh;
-    @BindView(R2.id.stateful_layout)
-    SimpleStatefulLayout statefulLayout;
 
     private PagerAdapter pagerAdapter;
     private Context context;
     private StarshipDashboardViewModel model;
     private StarshipDataRepository dataRepository;
-    private Unbinder unbinder;
     private boolean firstLaunch = true;
+    private StarshipFragmentViewPagerBinding binding;
 
 
     public static StarshipViewPager newInstance() {
@@ -79,6 +63,9 @@ public class StarshipViewPager extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        binding = StarshipFragmentViewPagerBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
+
         this.context = getActivity();
         setHasOptionsMenu(true);
 
@@ -92,25 +79,21 @@ public class StarshipViewPager extends BaseFragment {
             }
         }
 
-        View inflatedView = inflater.inflate(R.layout.starship_fragment_view_pager, container, false);
-        unbinder = ButterKnife.bind(this, inflatedView);
-
-
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.overview));
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.events));
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.vehicles));
+        binding.tabLayout.addTab(binding.tabLayout.newTab().setText(R.string.overview));
+        binding.tabLayout.addTab(binding.tabLayout.newTab().setText(R.string.events));
+        binding.tabLayout.addTab(binding.tabLayout.newTab().setText(R.string.vehicles));
 
         pagerAdapter = new PagerAdapter
-                (getChildFragmentManager(), tabLayout.getTabCount());
+                (getChildFragmentManager(), binding.tabLayout.getTabCount());
 
-        swipeRefresh.setEnabled(false);
+        binding.swipeRefresh.setEnabled(false);
 
-        viewPager.setAdapter(pagerAdapter);
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        binding.viewpager.setAdapter(pagerAdapter);
+        binding.viewpager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(binding.tabLayout));
+        binding.tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
+                binding.viewpager.setCurrentItem(tab.getPosition());
             }
 
             @Override
@@ -127,14 +110,14 @@ public class StarshipViewPager extends BaseFragment {
         model = ViewModelProviders.of(this).get(StarshipDashboardViewModel.class);
 
         if (firstLaunch) {
-            statefulLayout.showProgress();
+            binding.statefulLayout.showProgress();
         } else {
-            statefulLayout.showContent();
+            binding.statefulLayout.showContent();
         }
-        statefulLayout.setOfflineRetryOnClickListener(v -> fetchData());
+        binding.statefulLayout.setOfflineRetryOnClickListener(v -> fetchData());
         fetchData();
         firstLaunch = false;
-        return inflatedView;
+        return view;
     }
 
     private void fetchData() {
@@ -159,7 +142,7 @@ public class StarshipViewPager extends BaseFragment {
             @Override
             public void onError(String message, @Nullable Throwable throwable) {
                 if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-                    statefulLayout.showOffline();
+                    binding.statefulLayout.showOffline();
                     if (throwable != null) {
                         Timber.e(throwable);
                     } else {
@@ -192,15 +175,15 @@ public class StarshipViewPager extends BaseFragment {
     }
 
     private void showNetworkLoading(boolean refreshing) {
-        swipeRefresh.setRefreshing(refreshing);
+        binding.swipeRefresh.setRefreshing(refreshing);
     }
 
     private void updateViewModel(Starship starship) {
         if (starship != null) {
             model.getStarshipDashboard().setValue(starship);
-            statefulLayout.showContent();
+            binding.statefulLayout.showContent();
         } else {
-            statefulLayout.showEmpty();
+            binding.statefulLayout.showEmpty();
         }
     }
 

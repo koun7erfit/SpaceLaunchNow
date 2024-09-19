@@ -2,35 +2,21 @@ package me.calebjones.spacelaunchnow.astronauts.detail;
 
 import static me.calebjones.spacelaunchnow.common.utils.LinkHandler.openCustomTab;
 
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 
-import java.text.DateFormat;
 import java.util.Calendar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatButton;
-import androidx.appcompat.widget.AppCompatImageButton;
-import androidx.cardview.widget.CardView;
-import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProviders;
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import butterknife.Unbinder;
 import me.calebjones.spacelaunchnow.common.GlideApp;
 import me.calebjones.spacelaunchnow.common.base.BaseFragment;
 import me.calebjones.spacelaunchnow.common.prefs.ThemeHelper;
@@ -39,50 +25,14 @@ import me.calebjones.spacelaunchnow.common.utils.Utils;
 import me.calebjones.spacelaunchnow.data.models.main.Agency;
 import me.calebjones.spacelaunchnow.data.models.main.astronaut.Astronaut;
 import me.spacelaunchnow.astronauts.R;
-import me.spacelaunchnow.astronauts.R2;
+import me.spacelaunchnow.astronauts.databinding.AstronautProfileFragmentBinding;
 import timber.log.Timber;
 
 public class AstronautProfileFragment extends BaseFragment {
 
-    @BindView(R2.id.astronaut_bio_text)
-    TextView astronautBio;
-    @BindView(R2.id.astronaut_twitter_button)
-    AppCompatImageButton astronautTwitterButton;
-    @BindView(R2.id.astronaut_instagram_button)
-    AppCompatImageButton astronautInstagramButton;
-    @BindView(R2.id.astronaut_wiki_button)
-    AppCompatImageButton astronautWikiButton;
-    @BindView(R2.id.astronaut_wiki_button_solo)
-    AppCompatButton astronautWikiButtonSolo;
-    @BindView(R2.id.astronaut_status)
-    TextView astronautStatus;
-    @BindView(R2.id.lsp_logo)
-    ImageView lspLogo;
-    @BindView(R2.id.lsp_name)
-    TextView lspName;
-    @BindView(R2.id.lsp_type)
-    TextView lspType;
-    @BindView(R2.id.lsp_summary)
-    TextView lspSummary;
-    @BindView(R2.id.lsp_infoButton_one)
-    AppCompatButton lspInfoButtonOne;
-    @BindView(R2.id.lsp_wikiButton_one)
-    AppCompatButton lspWikiButtonOne;
-    @BindView(R2.id.lsp_card)
-    CardView lspCard;
-    @BindView(R2.id.lsp_administrator)
-    TextView lspAdministrator;
-    @BindView(R2.id.lsp_founded_year)
-    TextView lspFoundedYear;
-    @BindView(R2.id.lsp_agency)
-    AppCompatButton lspAgency;
-    @BindView(R2.id.astronaut_born)
-    TextView astronautBorn;
-    @BindView(R2.id.astronaut_died)
-    TextView astronautDied;
     private AstronautDetailViewModel mViewModel;
-    private Unbinder unbinder;
     private Context context;
+    private AstronautProfileFragmentBinding binding;
 
     public static AstronautProfileFragment newInstance() {
         return new AstronautProfileFragment();
@@ -97,8 +47,8 @@ public class AstronautProfileFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.astronaut_profile_fragment, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        binding = AstronautProfileFragmentBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
         return view;
     }
 
@@ -112,46 +62,46 @@ public class AstronautProfileFragment extends BaseFragment {
     }
 
     private void setAstronaut(Astronaut astronaut) {
-        astronautBio.setText(astronaut.getBio());
-        astronautStatus.setText(astronaut.getStatus().getName());
+        binding.astronautBioText.setText(astronaut.getBio());
+        binding.astronautStatus.setText(astronaut.getStatus().getName());
         int color = ThemeHelper.getIconColor(getActivity());
-        astronautInstagramButton.setImageDrawable(new IconicsDrawable(context).icon(FontAwesome.Icon.faw_instagram).sizeDp(24).color(color));
-        astronautWikiButton.setImageDrawable(new IconicsDrawable(context).icon(FontAwesome.Icon.faw_wikipedia_w).sizeDp(24).color(color));
-        astronautTwitterButton.setImageDrawable(new IconicsDrawable(context).icon(FontAwesome.Icon.faw_twitter).sizeDp(24).color(color));
+        binding.astronautInstagramButton.setImageDrawable(new IconicsDrawable(context).icon(FontAwesome.Icon.faw_instagram).sizeDp(24).color(color));
+        binding.astronautWikiButton.setImageDrawable(new IconicsDrawable(context).icon(FontAwesome.Icon.faw_wikipedia_w).sizeDp(24).color(color));
+        binding.astronautTwitterButton.setImageDrawable(new IconicsDrawable(context).icon(FontAwesome.Icon.faw_twitter).sizeDp(24).color(color));
 
         if (astronaut.getInstagram() != null) {
-            astronautInstagramButton.setVisibility(View.VISIBLE);
-            astronautInstagramButton.setOnClickListener(v -> {
+            binding.astronautInstagramButton.setVisibility(View.VISIBLE);
+            binding.astronautInstagramButton.setOnClickListener(v -> {
                 openCustomTab(context, astronaut.getInstagram());
             });
         } else {
-            astronautInstagramButton.setVisibility(View.GONE);
+            binding.astronautInstagramButton.setVisibility(View.GONE);
         }
 
         if (astronaut.getTwitter() != null) {
-            astronautTwitterButton.setVisibility(View.VISIBLE);
-            astronautTwitterButton.setOnClickListener(v -> {
+            binding.astronautTwitterButton.setVisibility(View.VISIBLE);
+            binding.astronautTwitterButton.setOnClickListener(v -> {
                 openCustomTab(context, astronaut.getTwitter());
             });
         } else {
-            astronautTwitterButton.setVisibility(View.GONE);
+            binding.astronautTwitterButton.setVisibility(View.GONE);
         }
 
         if (astronaut.getTwitter() == null
                 & astronaut.getInstagram() == null
                 & astronaut.getWiki() != null) {
-            astronautWikiButtonSolo.setVisibility(View.VISIBLE);
-            astronautWikiButton.setVisibility(View.GONE);
-            astronautWikiButtonSolo.setOnClickListener(v -> {
+            binding.astronautWikiButtonSolo.setVisibility(View.VISIBLE);
+            binding.astronautWikiButton.setVisibility(View.GONE);
+            binding.astronautWikiButtonSolo.setOnClickListener(v -> {
                 openCustomTab(context, astronaut.getWiki());
             });
         } else if (astronaut.getWiki() != null) {
-            astronautWikiButton.setVisibility(View.VISIBLE);
-            astronautWikiButton.setOnClickListener(v -> {
+            binding.astronautWikiButton.setVisibility(View.VISIBLE);
+            binding.astronautWikiButton.setOnClickListener(v -> {
                 openCustomTab(context, astronaut.getWiki());
             });
         } else {
-            astronautWikiButton.setVisibility(View.GONE);
+            binding.astronautWikiButton.setVisibility(View.GONE);
         }
 
 
@@ -170,15 +120,15 @@ public class AstronautProfileFragment extends BaseFragment {
         if (bornDate != null && deathDate == null) {
             int bornYear = astronaut.getDateOfBirth().getYear();
             int currentYear = Calendar.getInstance().getTime().getYear();
-            astronautBorn.setText(getString(R.string.born, bornDate, currentYear - bornYear));
-            astronautDied.setVisibility(View.GONE);
+            binding.astronautBorn.setText(getString(R.string.born, bornDate, currentYear - bornYear));
+            binding.astronautDied.setVisibility(View.GONE);
         }
         if (deathDate != null && bornDate != null) {
             int bornYear = astronaut.getDateOfBirth().getYear();
             int diedYear = astronaut.getDateOfDeath().getYear();
-            astronautBorn.setText(getString(R.string.born_one_argument, bornDate));
-            astronautDied.setText(getString(R.string.died_two_arguments, deathDate, diedYear - bornYear));
-            astronautDied.setVisibility(View.VISIBLE);
+            binding.astronautBorn.setText(getString(R.string.born_one_argument, bornDate));
+            binding.astronautDied.setText(getString(R.string.died_two_arguments, deathDate, diedYear - bornYear));
+            binding.astronautDied.setVisibility(View.VISIBLE);
         }
     }
 
@@ -186,42 +136,43 @@ public class AstronautProfileFragment extends BaseFragment {
         try {
             Timber.v("Setting up views...");
             if (agency != null) {
-                lspCard.setVisibility(View.VISIBLE);
+                binding.lspAgency.setOnClickListener(view -> launchesClicked());
+                binding.lspCard.setVisibility(View.VISIBLE);
 
-                lspAgency.setText(String.format(this.getString(me.calebjones.spacelaunchnow.common.R.string.view_rocket_launches), agency.getName()));
+                binding.lspAgency.setText(String.format(this.getString(me.calebjones.spacelaunchnow.common.R.string.view_rocket_launches), agency.getName()));
                 if (agency.getLogoUrl() != null) {
-                    lspLogo.setVisibility(View.VISIBLE);
+                    binding.lspLogo.setVisibility(View.VISIBLE);
                     GlideApp.with(context)
                             .load(agency.getLogoUrl())
                             .centerInside()
-                            .into(lspLogo);
+                            .into(binding.lspLogo);
                 } else {
-                    lspLogo.setVisibility(View.GONE);
+                    binding.lspLogo.setVisibility(View.GONE);
                 }
-                lspName.setText(agency.getName());
-                lspType.setText(agency.getType());
+                binding.lspName.setText(agency.getName());
+                binding.lspType.setText(agency.getType());
                 if (agency.getAdministrator() != null) {
-                    lspAdministrator.setText(String.format("%s", agency.getAdministrator()));
+                    binding.lspAdministrator.setText(String.format("%s", agency.getAdministrator()));
                 } else {
-                    lspAdministrator.setText(me.calebjones.spacelaunchnow.common.R.string.unknown_administrator);
+                    binding.lspAdministrator.setText(me.calebjones.spacelaunchnow.common.R.string.unknown_administrator);
                 }
                 if (agency.getFoundingYear() != null) {
-                    lspFoundedYear.setText(String.format(getString(me.calebjones.spacelaunchnow.common.R.string.founded_in), agency.getFoundingYear()));
+                    binding.lspFoundedYear.setText(String.format(getString(me.calebjones.spacelaunchnow.common.R.string.founded_in), agency.getFoundingYear()));
                 } else {
-                    lspFoundedYear.setText(me.calebjones.spacelaunchnow.common.R.string.unknown_year);
+                    binding.lspFoundedYear.setText(me.calebjones.spacelaunchnow.common.R.string.unknown_year);
                 }
-                lspSummary.setText(agency.getDescription());
+                binding.lspSummary.setText(agency.getDescription());
                 if (agency.getInfoUrl() == null) {
-                    lspInfoButtonOne.setVisibility(View.GONE);
+                    binding.lspInfoButtonOne.setVisibility(View.GONE);
                 }
 
                 if (agency.getWikiUrl() == null) {
-                    lspWikiButtonOne.setVisibility(View.GONE);
+                    binding.lspWikiButtonOne.setVisibility(View.GONE);
                 }
 
-                lspAgency.setVisibility(View.VISIBLE);
+                binding.lspAgency.setVisibility(View.VISIBLE);
             } else {
-                lspCard.setVisibility(View.GONE);
+                binding.lspCard.setVisibility(View.GONE);
             }
 
         } catch (NullPointerException e) {
@@ -229,7 +180,6 @@ public class AstronautProfileFragment extends BaseFragment {
         }
     }
 
-    @OnClick(R2.id.lsp_agency)
     void launchesClicked(){
         try {
             Intent intent = new Intent(context, AgencyLaunchActivity.class);

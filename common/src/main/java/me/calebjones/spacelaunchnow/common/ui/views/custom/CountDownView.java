@@ -2,10 +2,9 @@ package me.calebjones.spacelaunchnow.common.ui.views.custom;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.TextView;
 
-import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -14,42 +13,22 @@ import java.util.concurrent.TimeUnit;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.constraintlayout.widget.Group;
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import me.calebjones.spacelaunchnow.common.R;
-import me.calebjones.spacelaunchnow.common.R2;
+import me.calebjones.spacelaunchnow.common.databinding.CountdownLayoutViewBinding;
 import me.calebjones.spacelaunchnow.data.models.main.Launch;
 import me.calebjones.spacelaunchnow.common.ui.views.CountDownTimer;
 import timber.log.Timber;
 
 public class CountDownView extends ConstraintLayout {
 
-    @BindView(R2.id.common_countdown_layout)
-    ConstraintLayout constraintLayout;
-    @BindView(R2.id.countdown_days)
-    TextView countdownDays;
-    @BindView(R2.id.countdown_hours)
-    TextView countdownHours;
-    @BindView(R2.id.countdown_minutes)
-    TextView countdownMinutes;
-    @BindView(R2.id.countdown_seconds)
-    TextView countdownSeconds;
-    @BindView(R2.id.countdown_status)
-    TextView countdownStatus;
-    @BindView(R2.id.status_pill)
-    StatusPillView statusPill;
-    @BindView(R2.id.common_status_reason)
-    TextView statusReason;
-    @BindView(R2.id.countdown_view_group)
-    Group countdownGroup;
     private CountDownTimer timer;
     private Disposable var;
     private Launch launch;
     private Context context;
+    private CountdownLayoutViewBinding binding;
 
     public CountDownView(Context context) {
         super(context);
@@ -68,9 +47,8 @@ public class CountDownView extends ConstraintLayout {
 
 
     private void init(Context context) {
-        inflate(context, R.layout.countdown_layout_view, this);
-        ButterKnife.setDebug(true);
-        ButterKnife.bind(this);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        binding = CountdownLayoutViewBinding.inflate(inflater);
         this.context = context;
     }
 
@@ -92,12 +70,12 @@ public class CountDownView extends ConstraintLayout {
             @Override
             public void onFinish() {
                 Timber.v("Countdown finished.");
-                countdownDays.setText("00");
-                countdownHours.setText("00");
-                countdownMinutes.setText("00");
-                countdownSeconds.setText("00");
-                countdownStatus.setVisibility(View.VISIBLE);
-                countdownStatus.setText("+");
+                binding.countdownDays.setText("00");
+                binding.countdownHours.setText("00");
+                binding.countdownMinutes.setText("00");
+                binding.countdownSeconds.setText("00");
+                binding.countdownStatus.setVisibility(View.VISIBLE);
+                binding.countdownStatus.setText("+");
                 if (launch.isValid()) {
                     countUpTimer(launch.getNet().getTime());
                 }
@@ -112,23 +90,23 @@ public class CountDownView extends ConstraintLayout {
     }
 
     private void setLaunchCountdownComplete() {
-        countdownDays.setText("00");
-        countdownHours.setText("00");
-        countdownMinutes.setText("00");
-        countdownSeconds.setText("00");
+        binding.countdownDays.setText("00");
+        binding.countdownHours.setText("00");
+        binding.countdownMinutes.setText("00");
+        binding.countdownSeconds.setText("00");
     }
 
     private void launchInFlight() {
-        countdownStatus.setVisibility(View.VISIBLE);
+        binding.countdownStatus.setVisibility(View.VISIBLE);
         countUpTimer(launch.getNet().getTime());
     }
 
     private void launchStatusUnknown() {
-        countdownDays.setText("- -");
-        countdownHours.setText("- -");
-        countdownMinutes.setText("- -");
-        countdownSeconds.setText("- -");
-        countdownGroup.setVisibility(GONE);
+        binding.countdownDays.setText("- -");
+        binding.countdownHours.setText("- -");
+        binding.countdownMinutes.setText("- -");
+        binding.countdownSeconds.setText("- -");
+        binding.countdownViewGroup.setVisibility(GONE);
     }
 
     private void countUpTimer(long longDate) {
@@ -185,46 +163,46 @@ public class CountDownView extends ConstraintLayout {
         try {
             // Update the views
             if (Integer.valueOf(days) > 0) {
-                countdownDays.setText(days);
+                binding.countdownDays.setText(days);
             } else {
-                countdownDays.setText("00");
+                binding.countdownDays.setText("00");
             }
 
             if (Integer.valueOf(hours) > 0) {
-                countdownHours.setText(hours);
+                binding.countdownHours.setText(hours);
             } else if (Integer.valueOf(days) > 0) {
-                countdownHours.setText("00");
+                binding.countdownHours.setText("00");
             } else {
-                countdownHours.setText("00");
+                binding.countdownHours.setText("00");
             }
 
             if (Integer.valueOf(minutes) > 0) {
-                countdownMinutes.setText(minutes);
+                binding.countdownMinutes.setText(minutes);
             } else if (Integer.valueOf(hours) > 0 || Integer.valueOf(days) > 0) {
-                countdownMinutes.setText("00");
+                binding.countdownMinutes.setText("00");
             } else {
-                countdownMinutes.setText("00");
+                binding.countdownMinutes.setText("00");
             }
 
             if (Integer.valueOf(seconds) > 0) {
-                countdownSeconds.setText(seconds);
+                binding.countdownSeconds.setText(seconds);
             } else if (Integer.valueOf(minutes) > 0 || Integer.valueOf(hours) > 0 || Integer.valueOf(days) > 0) {
-                countdownSeconds.setText("00");
+                binding.countdownSeconds.setText("00");
             } else {
-                countdownSeconds.setText("00");
+                binding.countdownSeconds.setText("00");
             }
         } catch (NumberFormatException e) {
-            countdownHours.setText("00");
-            countdownDays.setText("00");
-            countdownMinutes.setText("00");
-            countdownSeconds.setText("00");
+            binding.countdownHours.setText("00");
+            binding.countdownDays.setText("00");
+            binding.countdownMinutes.setText("00");
+            binding.countdownSeconds.setText("00");
         }
     }
 
     public void setLaunch(Launch launch) {
         this.launch = launch;
         checkCountdownTimer(this.launch);
-        statusPill.setStatus(launch);
+        binding.statusPill.setStatus(launch);
     }
 
     private void checkCountdownTimer(Launch launch) {
@@ -240,34 +218,34 @@ public class CountDownView extends ConstraintLayout {
 
         String hold = launch.getHoldreason();
         String failure = launch.getFailreason();
-        statusReason.setVisibility(GONE);
+        binding.commonStatusReason.setVisibility(GONE);
         if (hold != null && hold.length() > 0) {
-            statusReason.setText(hold);
+            binding.commonStatusReason.setText(hold);
             setReasonConstraintToBottom();
-            statusReason.setVisibility(VISIBLE);
+            binding.commonStatusReason.setVisibility(VISIBLE);
         }
 
         if (failure != null && failure.length() > 0) {
-            statusReason.setText(failure);
+            binding.commonStatusReason.setText(failure);
             setReasonConstraintToBottom();
-            statusReason.setVisibility(VISIBLE);
+            binding.commonStatusReason.setVisibility(VISIBLE);
         }
 
         if (launch.getStatus().getId() == 2){
-            statusReason.setText(R.string.date_unconfirmed);
-            statusReason.setVisibility(VISIBLE);
+            binding.commonStatusReason.setText(R.string.date_unconfirmed);
+            binding.commonStatusReason.setVisibility(VISIBLE);
             setReasonConstraintToStatusPill();
         } else if (launch.getStatus().getId() == 8){
-            statusReason.setText(R.string.to_be_confirmed);
+            binding.commonStatusReason.setText(R.string.to_be_confirmed);
             setReasonConstraintToStatusPill();
-            statusReason.setVisibility(VISIBLE);
+            binding.commonStatusReason.setVisibility(VISIBLE);
         } else {
-            statusReason.setVisibility(GONE);
+            binding.commonStatusReason.setVisibility(GONE);
         }
 
         long timeToFinish = launchDate.getTimeInMillis() - now.getTimeInMillis();
-        countdownGroup.setVisibility(VISIBLE);
-        if (timeToFinish > 0 && (launch.getStatus().getId() == 1 || launch.getStatus().getId() == 1)) {
+        binding.countdownViewGroup.setVisibility(VISIBLE);
+        if (timeToFinish > 0 && launch.getStatus().getId() == 1) {
             startLaunchCountdown(timeToFinish);
         } else if (launch.getStatus().getId() == 3 || launch.getStatus().getId() == 4 || launch.getStatus().getId() == 7) {
             setLaunchCountdownComplete();
@@ -280,16 +258,16 @@ public class CountDownView extends ConstraintLayout {
 
     private void setReasonConstraintToBottom() {
         ConstraintSet constraintSet = new ConstraintSet();
-        constraintSet.clone(constraintLayout);
+        constraintSet.clone(binding.commonCountdownLayout);
         constraintSet.connect(R.id.common_status_reason, ConstraintSet.TOP, R.id.bottom_divider, ConstraintSet.BOTTOM,60);
-        constraintSet.applyTo(constraintLayout);
+        constraintSet.applyTo(binding.commonCountdownLayout);
     }
 
     private void setReasonConstraintToStatusPill() {
         ConstraintSet constraintSet = new ConstraintSet();
-        constraintSet.clone(constraintLayout);
+        constraintSet.clone(binding.commonCountdownLayout);
         constraintSet.connect(R.id.common_status_reason, ConstraintSet.TOP, R.id.status_pill, ConstraintSet.BOTTOM,20);
-        constraintSet.applyTo(constraintLayout);
+        constraintSet.applyTo(binding.commonCountdownLayout);
     }
 
     public Calendar DateToCalendar(Date date) {

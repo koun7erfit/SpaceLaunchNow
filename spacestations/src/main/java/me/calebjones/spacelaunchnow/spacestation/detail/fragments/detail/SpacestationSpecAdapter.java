@@ -11,6 +11,8 @@ import java.util.List;
 
 import androidx.recyclerview.widget.RecyclerView;
 import me.calebjones.spacelaunchnow.spacestation.R;
+import me.calebjones.spacelaunchnow.spacestation.databinding.SpacestationItemBinding;
+import me.calebjones.spacelaunchnow.spacestation.databinding.SpacestationSpecItemBinding;
 
 /**
  * This adapter takes data from ListPreferences/LoaderService and applies it to RecyclerView
@@ -19,6 +21,7 @@ public class SpacestationSpecAdapter extends RecyclerView.Adapter<SpacestationSp
 
         public int position;
         private List<SpacestationSpecItem> specs;
+        private SpacestationSpecItemBinding binding;
 
         public SpacestationSpecAdapter() {
             specs = new ArrayList<>();
@@ -29,20 +32,18 @@ public class SpacestationSpecAdapter extends RecyclerView.Adapter<SpacestationSp
             notifyDataSetChanged();
         }
 
-
-
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-            View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.spacestation_spec_item, viewGroup, false);
-            return new ViewHolder(v);
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            binding = SpacestationSpecItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+            return new ViewHolder(binding);
         }
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int i) {
             SpacestationSpecItem item = specs.get(i);
-            holder.title.setText(item.getTitle());
-            holder.value.setText(item.getValue());
-            holder.icon.setImageDrawable(item.getDrawable());
+            holder.binding.specTitle.setText(item.getTitle());
+            holder.binding.specValue.setText(item.getValue());
+            holder.binding.specIcon.setImageDrawable(item.getDrawable());
         }
 
         @Override
@@ -52,16 +53,12 @@ public class SpacestationSpecAdapter extends RecyclerView.Adapter<SpacestationSp
 
         public class ViewHolder extends RecyclerView.ViewHolder {
 
-            private ImageView icon;
-            private TextView title;
-            private TextView value;
+            private SpacestationSpecItemBinding binding;
 
             //Add content to the card
-            public ViewHolder(View view) {
-                super(view);
-                icon = view.findViewById(R.id.spec_icon);
-                title = view.findViewById(R.id.spec_title);
-                value = view.findViewById(R.id.spec_value);
+            public ViewHolder(SpacestationSpecItemBinding binding) {
+                super(binding.getRoot());
+                this.binding = binding;
             }
         }
     }

@@ -6,12 +6,20 @@
     android:orientation="vertical"
     >
 
-    <include layout="@layout/starship_dashboard_livestream_card" />
+    <include
+        android:id="@+id/starship_dashboard_livestream_card"
+        layout="@layout/starship_dashboard_livestream_card" />
 
-    <include layout="@layout/starship_dashboard_upnext" />
+    <include
+        android:id="@+id/starship_dashboard_upnext"
+        layout="@layout/starship_dashboard_upnext" />
 
-    <include layout="@layout/starship_dashboard_roadclosure_card" />
+    <include
+        android:id="@+id/starship_dashboard_roadclosure_card"
+        layout="@layout/starship_dashboard_roadclosure_card" />
 
-    <include layout="@layout/starship_dashboard_notices_card" />
+    <include
+        android:id="@+id/starship_dashboard_notices_card"
+        layout="@layout/starship_dashboard_notices_card" />
 
 </LinearLayout>

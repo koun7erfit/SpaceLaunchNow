@@ -747,4 +747,5 @@
         <item>5</item>
         <item>1440</item>
     </string-array>
+    <string name="follow_all_launches_description">This option follows all launches available, some of which do not fit neatly into a category listed above.</string>
 </resources>
